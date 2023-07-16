@@ -2892,7 +2892,7 @@
                                     "qty"
                                 ],
                                 "properties": {
-                                    "qty": {    
+                                    "qty": {
                                         "description": "Index used as cart_item_id and value is quantity of the product, Use for all types of product (Required)",
                                         "type": "array",
                                         "items": {

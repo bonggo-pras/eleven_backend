@@ -72,13 +72,13 @@
                             </div>
                         @endif
 
-                        @if (count($product->getTypeInstance()->getCustomerGroupPricingOffers()) > 0)
+                        <!-- @if (count($product->getTypeInstance()->getCustomerGroupPricingOffers()) > 0)
                             <div class="regular-price">
                                 @foreach ($product->getTypeInstance()->getCustomerGroupPricingOffers() as $offers)
                                     <p> {{ $offers }} </p>
                                 @endforeach
                             </div>
-                        @endif
+                        @endif -->
 
                         @include ('shop::products.view.stock', ['product' => $product])
 

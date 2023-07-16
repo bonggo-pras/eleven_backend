@@ -4,29 +4,27 @@ return [
     [
         'key'    => 'sales.paymentmethods.midtrans',
         'name'   => 'Midtrans',
-        'sort'   => 4,
+        'sort'   => 0,
         'fields' => [
             [
-                'name' => 'active',
-                'title' => 'Active',
-                'type' => 'select',
-                'options' => [
-                    [
-                        'title' => 'Active',
-                        'value' => true
-                    ],
-                    [
-                        'title' => 'In active',
-                        'value' => false
-                    ]
-                ],
+                'name'          => 'active',
+                'title'         => 'admin::app.admin.system.status',
+                'type'          => 'boolean',
+                'validation'    => 'required',
+                'channel_based' => false,
+                'locale_based'  => true
+            ],
+            [
+                'name' => 'server_key',
+                'title' => 'Server Key',
+                'type' => 'text',
                 'validation' => 'required',
                 'channel_based' => false,
                 'locale_based' => false
             ],
             [
-                'name' => 'server_key',
-                'title' => 'Server Key',
+                'name' => 'client_key',
+                'title' => 'Client Key',
                 'type' => 'text',
                 'validation' => 'required',
                 'channel_based' => false,

@@ -2,9 +2,9 @@
 
 namespace Webkul\Midtrans\Payment;
 
-use App\Http\Controllers\Midtrans\SnapPayment;
 use Webkul\Payment\Payment\Payment;
 use Webkul\Checkout\Facades\Cart;
+use Webkul\Midtrans\SnapPayment;
 use Webkul\Sales\Repositories\OrderRepository;
 
 class MidtransPayment extends Payment
@@ -31,7 +31,7 @@ class MidtransPayment extends Payment
 
     public function getAPIConfig($name = '')
     {
-        return core()->getConfigData("midtrans.general.api.{$name}");
+        return core()->getConfigData("sales.paymentmethods.midtrans.{$name}");
     }
 
     public function getRedirectUrl()

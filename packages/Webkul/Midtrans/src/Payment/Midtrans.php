@@ -4,17 +4,7 @@ namespace Webkul\Midtrans\Payment;
 
 use Webkul\Payment\Payment\Payment;
 
-class Midtrans extends Payment
+class Midtrans extends MidtransPayment
 {
-    /**
-     * Payment method code
-     *
-     * @var string
-     */
-    protected $code  = 'midtrans';
-
-    public function getRedirectUrl()
-    {
-        
-    }
+    protected $code = 'midtrans';
 }

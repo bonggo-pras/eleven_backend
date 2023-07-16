@@ -284,7 +284,8 @@ return [
         Webkul\Marketing\Providers\MarketingServiceProvider::class,
         Webkul\Notification\Providers\NotificationServiceProvider::class,
         Webkul\Sitemap\Providers\SitemapServiceProvider::class,
-        Webkul\Midtrans\Providers\MidtransServiceProvider::class
+        Webkul\Midtrans\Providers\MidtransServiceProvider::class,
+        Webkul\CustomerReward\Providers\CustomerRewardServiceProvider::class
     ],
 
     /*

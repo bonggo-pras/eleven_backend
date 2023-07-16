@@ -15,7 +15,6 @@ class Payment
     public function getSupportedPaymentMethods()
     {
         $paymentMethods = $this->getPaymentMethods();
-
         return [
             'jump_to_section' => 'payment',
             'paymentMethods'  => $paymentMethods,

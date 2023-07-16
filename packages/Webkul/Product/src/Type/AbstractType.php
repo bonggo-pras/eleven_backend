@@ -20,6 +20,8 @@ use Webkul\Product\Repositories\ProductVideoRepository;
 use Webkul\Tax\Helpers\Tax;
 use Webkul\Tax\Repositories\TaxCategoryRepository;
 
+use function PHPUnit\Framework\isNull;
+
 abstract class AbstractType
 {
     /**
@@ -670,7 +672,13 @@ abstract class AbstractType
 
         if (auth()->guard()->check()) {
             $customerGroupId = auth()->guard()->user()->customer_group_id;
-        } else {
+        } 
+
+        if (auth('sanctum')->check()) {
+            $customerGroupId = auth('sanctum')->user()->customer_group_id;
+        }
+        
+        if (empty($customerGroupId)) {
             $customerGuestGroup = app(CustomerGroupRepository::class)->getCustomerGuestGroup();
 
             if ($customerGuestGroup) {
@@ -769,7 +777,7 @@ abstract class AbstractType
     public function getPriceHtml()
     {
         if ($this->haveSpecialPrice()) {
-            $html = '<div class="sticker sale">' . trans('shop::app.products.sale') . '</div>'
+            $html = '<div class="sticker sale hvSP">' . trans('shop::app.products.sale') . '</div>'
             . '<span class="regular-price">' . core()->currency($this->evaluatePrice($this->product->price)) . '</span>'
             . '<span class="special-price">' . core()->currency($this->evaluatePrice($this->getSpecialPrice())) . '</span>';
         } else {

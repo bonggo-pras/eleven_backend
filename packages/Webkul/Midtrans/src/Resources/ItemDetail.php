@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Midtrans\Resources;
+namespace Webkul\Midtrans\Resources;
 
 class ItemDetail extends AbstractResource
 {

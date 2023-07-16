@@ -1,0 +1,27 @@
+{
+    "name": "bagisto/laravel-midtrans",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Digital88",
+            "email": "bonggoprasetyanto@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Midtrans\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Midtrans\\Providers\\MidtransServiceProvider"
+            ],
+            "aliases": {
+                "Bouncer": {}
+            }
+        }
+    },
+    "minimum-stability": "dev"
+}

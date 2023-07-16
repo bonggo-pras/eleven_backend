@@ -2,6 +2,7 @@
 
 namespace Webkul\Midtrans\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class MidtransServiceProvider extends ServiceProvider
@@ -13,7 +14,6 @@ class MidtransServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app->register(EventServiceProvider::class);
     }
 
     /**
@@ -24,8 +24,10 @@ class MidtransServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerConfig();
+        
+        $this->registerRoutes();
     }
-    
+
     /**
      * Register package config.
      *
@@ -34,11 +36,20 @@ class MidtransServiceProvider extends ServiceProvider
     protected function registerConfig()
     {
         $this->mergeConfigFrom(
-            dirname(__DIR__) . '/Config/paymentmethods.php', 'paymentmethods'
+            dirname(__DIR__) . '/Config/paymentmethods.php',
+            'paymentmethods'
         );
 
         $this->mergeConfigFrom(
-            dirname(__DIR__) . '/Config/system.php', 'core'
+            dirname(__DIR__) . '/Config/system.php',
+            'core'
         );
+    }
+
+    public function registerRoutes()
+    {
+        Route::namespace('Webkul\Midtrans\Http\Controllers\API')
+            ->prefix('api/v1/midtrans')
+            ->group(__DIR__ . '/../../routes/api.php');
     }
 }

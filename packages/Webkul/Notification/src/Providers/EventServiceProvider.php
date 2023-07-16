@@ -2,20 +2,21 @@
 
 namespace Webkul\Notification\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap services.
+     * The event handler mappings for the application.
      *
-     * @return void
+     * @var array
      */
-    public function boot()
-    {
-        Event::listen('checkout.order.save.after', 'Webkul\Notification\Listeners\Order@createOrder');
-
-        Event::listen('sales.order.update-status.after', 'Webkul\Notification\Listeners\Order@updateOrder');
-    }
+    protected $listen = [
+        'checkout.order.save.after' => [
+            'Webkul\Notification\Listeners\Order@createOrder'
+        ],
+        'sales.order.update-status.after' => [
+            'Webkul\Notification\Listeners\Order@updateOrder'
+        ],
+    ];
 }

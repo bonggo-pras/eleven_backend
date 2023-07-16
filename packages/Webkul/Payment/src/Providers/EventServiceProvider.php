@@ -15,5 +15,7 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         Event::listen('checkout.order.save.after', 'Webkul\Payment\Listeners\GenerateInvoice@handle');
+
+        Event::listen('payment.midtrans.notification.received', 'Webkul\Payment\Listeners\PaymentReceived@updateOrder');
     }
 }
