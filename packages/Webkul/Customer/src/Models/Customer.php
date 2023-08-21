@@ -14,6 +14,7 @@ use Webkul\Core\Models\SubscribersListProxy;
 use Webkul\Customer\Contracts\Customer as CustomerContract;
 use Webkul\Customer\Database\Factories\CustomerFactory;
 use Webkul\Customer\Notifications\CustomerResetPassword;
+use Webkul\CustomerReward\Models\PointHistoryProxy;
 use Webkul\Product\Models\ProductReviewProxy;
 use Webkul\Sales\Models\OrderProxy;
 
@@ -49,6 +50,8 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
         'is_verified',
         'is_suspended',
         'notes',
+        'total_point',
+        'referral_code'
     ];
 
     /**
@@ -69,7 +72,7 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
      */
     protected static function newFactory()
     {
-        return CustomerFactory::new ();
+        return CustomerFactory::new();
     }
 
     /**
@@ -130,7 +133,7 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
      */
     public function image_url()
     {
-        if (! $this->image) {
+        if (!$this->image) {
             return;
         }
 
@@ -277,5 +280,15 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
     public function subscription()
     {
         return $this->hasOne(SubscribersListProxy::modelClass(), 'customer_id');
+    }
+
+    /**
+     * Get all orders of a customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function all_points()
+    {
+        return $this->hasMany(PointHistoryProxy::modelClass(), 'customer_id');
     }
 }

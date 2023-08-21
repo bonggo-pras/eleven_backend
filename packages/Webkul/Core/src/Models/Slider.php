@@ -49,7 +49,7 @@ class Slider extends Model implements SliderContract
             return '';
         }
 
-        return Storage::url($this->path);
+        return url('storage/' . $this->path);
     }
 
     /**

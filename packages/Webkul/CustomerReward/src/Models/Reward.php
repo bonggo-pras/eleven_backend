@@ -8,28 +8,15 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Webkul\Customer\Models\Customer;
 use Webkul\Sales\Models\Order;
 
-class PointHistory extends Model
+class Reward extends Model
 {
     use HasFactory;
 
-    protected $table = 'point_histories';
+    protected $table = 'rewards';
 
     protected $guarded = [
         'id',
         'created_at',
         'updated_at',
     ];
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
-    }
-
-    /**
-     * Get the customer record associated with the order.
-     */
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
 }

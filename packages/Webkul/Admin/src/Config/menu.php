@@ -98,6 +98,12 @@ return [
         'sort'       => 3,
         'icon-class' => '',
     ], [
+        'key'        => 'customers.marketing',
+        'name'       => 'admin::app.layouts.marketing',
+        'route'      => 'admin.marketings.earnings.index',
+        'sort'       => 4,
+        'icon-class' => '',
+    ], [
         'key'        => 'configuration',
         'name'       => 'admin::app.layouts.configure',
         'route'      => 'admin.configuration.index',

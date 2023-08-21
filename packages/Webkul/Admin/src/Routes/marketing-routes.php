@@ -7,6 +7,8 @@ use Webkul\CatalogRule\Http\Controllers\CatalogRuleController;
 use Webkul\Core\Http\Controllers\SubscriptionController;
 use Webkul\Marketing\Http\Controllers\CampaignController;
 use Webkul\Marketing\Http\Controllers\EventController;
+use Webkul\Marketing\Http\Controllers\MarketingController;
+use Webkul\Marketing\Http\Controllers\MarketingEarningController;
 use Webkul\Marketing\Http\Controllers\TemplateController;
 use Webkul\Sitemap\Http\Controllers\Admin\SitemapController;
 
@@ -197,5 +199,12 @@ Route::group(['middleware' => ['web', 'admin'], 'prefix' => config('app.admin_ur
         ])->name('admin.sitemaps.update');
 
         Route::post('sitemaps/delete/{id}', [SitemapController::class, 'destroy'])->name('admin.sitemaps.delete');
+
+        /**
+         * Marketing routes.
+         */
+        Route::get('marketing/earnings', [MarketingEarningController::class, 'index'])->defaults('_config', [
+            'view' => 'admin::marketing.earnings.index',
+        ])->name('admin.marketings.earnings.index');
     });
 });

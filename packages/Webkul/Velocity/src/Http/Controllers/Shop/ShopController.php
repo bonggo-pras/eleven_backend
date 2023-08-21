@@ -14,7 +14,7 @@ class ShopController extends Controller
     public function search()
     {
         $results = $this->velocityProductRepository->searchProductsFromCategory(request()->all());
-
+        
         return view($this->_config['view'])->with('results', $results ? $results : null);
     }
 

@@ -19,7 +19,12 @@ use Webkul\Product\Repositories\ProductDownloadableLinkRepository;
 use Webkul\Product\Repositories\ProductDownloadableSampleRepository;
 use Webkul\Product\Repositories\ProductInventoryRepository;
 use Webkul\Product\Repositories\ProductRepository;
-
+/**
+ * @OA\Get(
+ *     path="/projects",
+ *     @OA\Response(response="200", description="Display a listing of projects.")
+ * )
+ */
 class ProductController extends Controller
 {
     /**

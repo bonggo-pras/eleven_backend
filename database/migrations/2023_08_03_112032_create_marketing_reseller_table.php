@@ -13,15 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('point_histories', function (Blueprint $table) {
+        Schema::create('marketing_reseller', function (Blueprint $table) {
             $table->id();
             $table->integer('customer_id')->unsigned();
-            $table->integer('order_id')->nullable();
-            $table->integer('reward_id')->nullable();
-            $table->integer('amount');
-            $table->string('type');
-            $table->string('status');
-            $table->string('remarks');
+            $table->integer('marketing_id')->unsigned();
             $table->timestamps();
         });
     }
@@ -33,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('point_histories');
+        Schema::dropIfExists('marketing_reseller');
     }
 };

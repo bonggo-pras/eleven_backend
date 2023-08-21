@@ -5,8 +5,10 @@ namespace Webkul\CustomerReward\Http\Controllers\API;
 use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Webkul\Customer\Models\Customer;
 use Webkul\CustomerReward\Http\Resources\CustomerRewardResource;
-use Webkul\CustomerReward\Repositories\CustomerRewardRepository;
+use Webkul\CustomerReward\Repositories\PointHistoryRepository;
+use Webkul\Sales\Models\Order;
 
 class CustomerRewardController extends Controller
 {
@@ -19,28 +21,62 @@ class CustomerRewardController extends Controller
      */
     protected $_config;
 
-    protected $customerRewardRepository;
+    protected $pointHistoryRepository;
 
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(CustomerRewardRepository $customerRewardRepository)
+    public function __construct(PointHistoryRepository $pointHistoryRepository)
     {
         $this->_config = request('_config');
-        $this->customerRewardRepository = $customerRewardRepository;
+        $this->pointHistoryRepository = $pointHistoryRepository;
     }
 
     public function getCustomerPoints()
     {
-        $cek = $this->customerRewardRepository->getCustomerPointHistories() ?? null;
+        $customerId = null;
 
-        dd($cek);
+        if (auth()->guard()->check()) {
+            $customerId = auth()->guard()->user()->id;
+        }
+
+        if (auth('sanctum')->check()) {
+            $customerId = auth('sanctum')->user()->id;
+        }
+
+        $pointHistories = $this->pointHistoryRepository->getCustomerPointHistories($customerId) ?? null;
+        $customer = Customer::where('id', $customerId)->first();
 
         return response([
-            'data'    => new CustomerRewardResource($cek),
-            'message' => 'Your review submitted successfully.',
+            'data'    => [
+                'total_point' => $customer->total_point,
+                'total' => $pointHistories->count(),
+                'histories' => CustomerRewardResource::collection($pointHistories)
+            ],
+            'message' => 'Get point history selected customer',
         ]);
+    }
+
+    public function setCustomerPoint($order)
+    {
+        if ($order->status == 'completed') {
+            $getpoint = $this->pointHistoryRepository->setCustomerPoint($order);
+
+            return response([
+                'data' => [
+                    'total_point' => $getpoint
+                ],
+                'message' => 'Success update point customer',
+            ]);
+        } else {
+            return response([
+                'data' => [
+                    'total_point' => 0
+                ],
+                'message' => 'Failed to update point customer',
+            ]);
+        }
     }
 }

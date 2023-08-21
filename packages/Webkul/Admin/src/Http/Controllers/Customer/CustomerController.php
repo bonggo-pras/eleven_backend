@@ -30,8 +30,7 @@ class CustomerController extends Controller
     public function __construct(
         protected CustomerRepository $customerRepository,
         protected CustomerGroupRepository $customerGroupRepository
-    )
-    {
+    ) {
         $this->_config = request('_config');
     }
 
@@ -78,9 +77,13 @@ class CustomerController extends Controller
 
         $password = rand(100000, 10000000);
 
+        $referral_code = $this->generateReferralCode();
+
+        request()->merge(["referral_code" => $referral_code]);
+
         Event::dispatch('customer.registration.before');
 
-        $customer = $this->customerRepository->create(array_merge(request()->all() , [
+        $customer = $this->customerRepository->create(array_merge(request()->all(), [
             'password'    => bcrypt($password),
             'is_verified' => 1,
         ]));
@@ -134,7 +137,7 @@ class CustomerController extends Controller
         ]);
 
         Event::dispatch('customer.update.before', $id);
-        
+
         $customer = $this->customerRepository->update(array_merge(request()->all(), [
             'status'       => request()->has('status'),
             'is_suspended' => request()->has('is_suspended'),
@@ -158,14 +161,15 @@ class CustomerController extends Controller
         $customer = $this->customerRepository->findorFail($id);
 
         try {
-            if (! $this->customerRepository->checkIfCustomerHasOrderPendingOrProcessing($customer)) {
+            if (!$this->customerRepository->checkIfCustomerHasOrderPendingOrProcessing($customer)) {
                 $this->customerRepository->delete($id);
 
                 return response()->json(['message' => trans('admin::app.response.delete-success', ['name' => 'Customer'])]);
             }
 
             return response()->json(['message' => trans('admin::app.response.order-pending', ['name' => 'Customer'])], 400);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         return response()->json(['message' => trans('admin::app.response.delete-failed', ['name' => 'Customer'])], 400);
     }
@@ -242,10 +246,10 @@ class CustomerController extends Controller
     {
         $customerIds = explode(',', request()->input('indexes'));
 
-        if (! $this->customerRepository->checkBulkCustomerIfTheyHaveOrderPendingOrProcessing($customerIds)) {
+        if (!$this->customerRepository->checkBulkCustomerIfTheyHaveOrderPendingOrProcessing($customerIds)) {
             foreach ($customerIds as $customerId) {
                 Event::dispatch('customer.delete.before', $customerId);
-                
+
                 $this->customerRepository->delete($customerId);
 
                 Event::dispatch('customer.delete.after', $customerId);
@@ -289,5 +293,25 @@ class CustomerController extends Controller
         $customer = $this->customerRepository->find(request('id'));
 
         return view($this->_config['view'], compact('customer'));
+    }
+
+    public function generateReferralCode($length = 6) {
+        // Set the chars
+        $chars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    
+        // Count the total chars
+        $totalChars = strlen($chars);
+    
+        // Get the total repeat
+        $totalRepeat = ceil($length/$totalChars);
+    
+        // Repeat the string
+        $repeatString = str_repeat($chars, $totalRepeat);
+    
+        // Shuffle the string result
+        $shuffleString = str_shuffle($repeatString);
+    
+        // get the result random string
+        return substr($shuffleString,1,$length);
     }
 }

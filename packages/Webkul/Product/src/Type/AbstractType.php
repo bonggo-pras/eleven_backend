@@ -1150,4 +1150,13 @@ abstract class AbstractType
 
         return $loadedSaleableChecks[$product->id] = $callback($product);
     }
+
+    public function getPoint()
+    {
+        $product = $this->product->product_flats()->first();
+
+        $point = $product != null ? $product->point : 0;
+        
+        return $point;
+    }
 }

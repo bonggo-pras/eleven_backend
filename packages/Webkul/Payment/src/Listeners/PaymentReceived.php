@@ -2,6 +2,7 @@
 
 namespace Webkul\Payment\Listeners;
 
+use Webkul\CustomerReward\Repositories\PointHistoryRepository;
 use Webkul\Sales\Models\Order;
 use Webkul\Sales\Repositories\InvoiceRepository;
 use Webkul\Sales\Repositories\OrderRepository;
@@ -12,17 +13,20 @@ class PaymentReceived
 
     protected $orderRepository;
 
-    public function __construct(InvoiceRepository $invoiceRepository, OrderRepository $orderRepository)
+    protected $pointHistoryRepository;
+
+    public function __construct(InvoiceRepository $invoiceRepository, OrderRepository $orderRepository, PointHistoryRepository $pointHistoryRepository)
     {
         $this->invoiceRepository = $invoiceRepository;
         $this->orderRepository = $orderRepository;
+        $this->pointHistoryRepository = $pointHistoryRepository;
     }
 
     public function updateOrder($notification)
     {
         $paymentStatus = $notification->transaction_status;
 
-        $order = Order::select(['id', 'grand_total'])->where([
+        $order = Order::where([
             'increment_id' => $notification->order_id,
             'status' => 'pending'
         ])->first();
@@ -50,11 +54,18 @@ class PaymentReceived
 
                     $this->invoiceRepository->create($invoiceData);
 
-                    $this->orderRepository->updateOrderStatus($order, 'completed');
+                    $this->updatePointCustomer($order);
                 }
 
                 $order->payment->save();
             }
         }
+    }
+
+    public function updatePointCustomer($order)
+    {
+        $getpoint = $this->pointHistoryRepository->setCustomerPoint($order);
+
+        return $getpoint;
     }
 }
