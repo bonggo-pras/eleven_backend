@@ -40,7 +40,8 @@ class RewardController extends Controller
 
         return response([
             'data'    => [
-                'rewards' => RewardResource::collection($rewards)
+                'rewards' => RewardResource::collection($rewards),
+                'total_rewards' => $rewards->count()
             ],
             'message' => 'Get data all rewards',
         ]);

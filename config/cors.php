@@ -1,6 +1,7 @@
 <?php
 
 return [
+
     /*
     |--------------------------------------------------------------------------
     | Laravel CORS Options
@@ -11,7 +12,7 @@ return [
     | You don't need to provide both allowed_origins and allowed_origins_patterns.
     | If one of the strings passed matches, it is considered a valid origin.
     |
-    | If array('*') is provided to allowed_methods, allowed_origins or allowed_headers
+    | If ['*'] is provided to allowed_methods, allowed_origins or allowed_headers
     | all methods / origins / headers are allowed.
     |
     */
@@ -20,37 +21,37 @@ return [
      * You can enable CORS for 1 or multiple paths.
      * Example: ['api/*']
      */
-    'paths' => ['api/*'],
+    'paths' => ['http://127.0.0.1:8081','http://127.0.0.1:8080','http://localhost','http://localhost:8081','http://localhost:8081/*','api/*','sanctum/csrf-cookie','api','api/v1','api/v1/'],
 
     /*
-    * Matches the request method. `[*]` allows all methods.
+    * Matches the request method. `['*']` allows all methods.
     */
     'allowed_methods' => ['*'],
 
     /*
-     * Matches the request origin. `[*]` allows all origins.
+     * Matches the request origin. `['*']` allows all origins. Wildcards can be used, eg `*.mydomain.com`
      */
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['http://localhost:8081', '*'],
 
     /*
-     * Matches the request origin with, similar to `Request::is()`
+     * Patterns that can be used with `preg_match` to match the origin.
      */
-    'allowed_origins_patterns' => [],
+    'allowed_headers' => ['X-Custom-Header', 'Upgrade-Insecure-Requests', '*'],
 
     /*
-     * Sets the Access-Control-Allow-Headers response header. `[*]` allows all headers.
+     * Sets the Access-Control-Allow-Headers response header. `['*']` allows all headers.
      */
     'allowed_headers' => ['*'],
 
     /*
-     * Sets the Access-Control-Expose-Headers response header.
+     * Sets the Access-Control-Expose-Headers response header with these headers.
      */
-    'exposed_headers' => false,
+    'exposed_headers' => [],
 
     /*
-     * Sets the Access-Control-Max-Age response header.
+     * Sets the Access-Control-Max-Age response header when > 0.
      */
-    'max_age' => false,
+    'max_age' => 0,
 
     /*
      * Sets the Access-Control-Allow-Credentials header.

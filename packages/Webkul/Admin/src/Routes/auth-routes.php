@@ -13,7 +13,7 @@ Route::group(['middleware' => ['web'], 'prefix' => config('app.admin_url')], fun
     /**
      * Redirect route.
      */
-    Route::get('/', [Controller::class, 'redirectToLogin']);
+    Route::get('/', [Controller::class, 'redirectToLogin'])->name('admin.session.index');
 
     /**
      * Login routes.
