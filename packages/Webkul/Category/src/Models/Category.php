@@ -181,7 +181,7 @@ class Category extends TranslatableModel implements CategoryContract
             return;
         }
 
-        return Storage::url($this->image);
+        return asset("storage/". $this->image);
     }
 
     /**

@@ -140,7 +140,7 @@
         @elseif ($field['type'] == 'image')
 
             @php
-                $src = Storage::url(core()->getConfigData($nameKey, $channel, $locale));
+                $src = asset('storage/'. core()->getConfigData($nameKey, $channel, $locale));
                 $result = core()->getConfigData($nameKey, $channel, $locale);
             @endphp
 
