@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Webkul\Checkout\Models\CartProxy;
+use Webkul\CustomerReward\Models\PointHistoryProxy;
 use Webkul\Sales\Contracts\Order as OrderContract;
 use Webkul\Sales\Database\Factories\OrderFactory;
 
@@ -91,6 +92,14 @@ class Order extends Model implements OrderContract
     public function cart(): BelongsTo
     {
         return $this->belongsTo(CartProxy::modelClass());
+    }
+
+    /**
+     * Get the comments record associated with the order.
+     */
+    public function point_histories(): HasMany
+    {
+        return $this->hasMany(PointHistoryProxy::modelClass());
     }
 
     /**

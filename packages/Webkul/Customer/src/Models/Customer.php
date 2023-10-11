@@ -273,6 +273,16 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
     }
 
     /**
+     * Get all marketing of a customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function customerMarketing()
+    {
+        return $this->hasMany(MarketingResellerProxy::modelClass(), 'customer_id');
+    }
+
+    /**
      * Get the customer's subscription.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne

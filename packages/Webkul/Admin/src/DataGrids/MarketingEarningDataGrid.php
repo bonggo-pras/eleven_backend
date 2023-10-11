@@ -28,7 +28,7 @@ class MarketingEarningDataGrid extends DataGrid
      */
     public function prepareQueryBuilder()
     {
-        $queryBuilder = DB::table('customers')
+        $queryBuilder = DB::table('marketing_reseller')
             ->select([
                 'marketing_reseller.id as id',
                 DB::raw('CONCAT(' . DB::getTablePrefix() . 'customers.first_name, " ", ' . DB::getTablePrefix() . 'customers.last_name) as full_name'),
@@ -39,10 +39,10 @@ class MarketingEarningDataGrid extends DataGrid
                 DB::raw('SUM(orders.base_grand_total) as grand_total'),
                 'orders.created_at as order_date',
             ])
-            ->whereNotNull('customers.referral_code')
-            ->join('marketing_reseller', 'customers.id', 'marketing_reseller.marketing_id')
-            ->join('orders', 'marketing_reseller.customer_id', 'orders.customer_id')
-            ->groupBy('marketing_reseller.marketing_id');
+            ->join('customers', 'marketing_reseller.customer_id', 'customers.id')
+            ->join('orders', 'customers.id', 'orders.customer_id')
+            ->groupBy('marketing_reseller.marketing_id')
+            ->orderBy('marketing_reseller.id', 'ASC');
 
         $this->addFilter('order_date', 'orders.created_at');
 
@@ -66,7 +66,7 @@ class MarketingEarningDataGrid extends DataGrid
         ]);
 
         $this->addColumn([
-            'index'      => 'full_name',
+            'index'      => 'customer_id',
             'label'      => 'Nama Lengkap',
             'type'       => 'string',
             'searchable' => false,
@@ -121,7 +121,7 @@ class MarketingEarningDataGrid extends DataGrid
         $this->addAction([
             'title'  => trans('admin::app.datagrid.view'),
             'method' => 'GET',
-            'route'  => 'admin.sales.orders.view',
+            'route'  => 'admin.marketings.earnings.view',
             'icon'   => 'icon eye-icon',
         ]);
     }

@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Webkul\Customer\Models\Customer;
 use Webkul\Sales\Models\Order;
+use Webkul\CustomerReward\Contracts\PointHistory as PointHistoryContract;
 
-class PointHistory extends Model
-{
+class PointHistory extends Model implements PointHistoryContract
+{   
     use HasFactory;
 
     protected $table = 'point_histories';

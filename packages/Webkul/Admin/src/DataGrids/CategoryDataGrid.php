@@ -70,6 +70,7 @@ class CategoryDataGrid extends DataGrid
                 'cat.position',
                 'cat.status',
                 'ct.locale',
+                DB::raw('IFNULL(cat.parent_id, 0) as is_cat_child'),
                 DB::raw('COUNT(DISTINCT ' . DB::getTablePrefix() . 'pc.product_id) as count')
             )
             ->leftJoin('category_translations as ct', function ($leftJoin) use ($whereInLocales) {
@@ -78,7 +79,6 @@ class CategoryDataGrid extends DataGrid
             })
             ->leftJoin('product_categories as pc', 'cat.id', '=', 'pc.category_id')
             ->groupBy('cat.id', 'ct.locale',);
-
 
         $this->addFilter('status', 'cat.status');
         $this->addFilter('category_id', 'cat.id');
@@ -132,6 +132,22 @@ class CategoryDataGrid extends DataGrid
                     return trans('admin::app.datagrid.active');
                 } else {
                     return trans('admin::app.datagrid.inactive');
+                }
+            },
+        ]);
+
+        $this->addColumn([
+            'index'      => 'is_cat_child',
+            'label'      => trans('admin::app.datagrid.name'),
+            'type'       => 'booleand',
+            'searchable' => true,
+            'sortable'   => true,
+            'filterable' => true,
+            'closure'    => function ($value) {
+                if ($value->is_cat_child == 0) {
+                    return 'Parent Category';
+                } else {
+                    return 'Child Category';
                 }
             },
         ]);

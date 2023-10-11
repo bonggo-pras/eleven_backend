@@ -206,5 +206,9 @@ Route::group(['middleware' => ['web', 'admin'], 'prefix' => config('app.admin_ur
         Route::get('marketing/earnings', [MarketingEarningController::class, 'index'])->defaults('_config', [
             'view' => 'admin::marketing.earnings.index',
         ])->name('admin.marketings.earnings.index');
+
+        Route::get('marketing/earnings/{id}', [MarketingEarningController::class, 'view'])->defaults('_config', [
+            'view' => 'admin::marketing.earnings.view',
+        ])->name('admin.marketings.earnings.view');
     });
 });

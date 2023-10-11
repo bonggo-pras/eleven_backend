@@ -34,6 +34,8 @@
             {{ __('admin::app.catalog.products.add-variant-btn-title') }}
         </button>
 
+        <button type="button" class="btn btn-md btn-primary" @click="showModal('globalSetValue')">Global Set</button>
+
         <variant-list></variant-list>
 
         {!! view_render_event('bagisto.admin.catalog.product.edit_form_accordian.variations.controls.after', ['product' => $product]) !!}
@@ -47,6 +49,33 @@
 
     <div slot="body">
         <variant-form></variant-form>
+    </div>
+</modal>
+
+<modal id="globalSetValue" :is-open="modalIds.globalSetValue">
+    <h3 slot="header">Set Value Globally</h3>
+
+    <div slot="body">
+        <form id="globalValueForm">
+            <div class="page-content">
+                <div class="form-container">
+                    <div class="control-group">
+                        <label for="globalInputPrice">Price</label>
+                        <input type="number" name="globalInputPrice" class="control">
+                    </div>
+                    <div class="control-group">
+                        <label for="globalInputPrice">Price Two</label>
+                        <input type="number" name="globalInputPriceTwo" class="control">
+                    </div>
+                    <div class="control-group">
+                        <label for="globalInputWeight">Weight</label>
+                        <input type="number" name="globalInputWeight" class="control">
+                    </div>
+                    <button type="button" @click="saveGlobalValue()" class="btn btn-lg btn-primary">Save</button>
+                </div>
+            </div>
+
+        </form>
     </div>
 </modal>
 
@@ -106,8 +135,9 @@
                         <th class="sku">{{ __('admin::app.catalog.products.sku') }}</th>
                         <th>{{ __('admin::app.catalog.products.name') }}</th>
                         <th>{{ __('admin::app.catalog.products.images') }}</th>
-                        <th class="qty">{{ __('admin::app.catalog.products.qty') }}</th>
-                        <th class="price">{{ __('admin::app.catalog.products.price') }}</th>
+                        <th class="price">{{ __('admin::app.catalog.products.qty') }}</th>
+                        <th class="qty">{{ __('admin::app.catalog.products.price') }}</th>
+                        <th class="qty">{{ __('admin::app.catalog.products.price') }}</th>
                         <th class="weight">{{ __('admin::app.catalog.products.weight') }}</th>
                         <th class="status">{{ __('admin::app.catalog.products.status') }}</th>
                         <th class="actions"></th>
@@ -282,6 +312,25 @@
             </td>
 
             <td>
+                <div :class="['control-group', errors.has(variantInputName + '[pricebigreseller]') ? 'has-error' : '']">
+                    <input
+                        class="control"
+                        type="number"
+                        :name="[variantInputName + '[pricebigreseller]']"
+                        v-model="variant.pricebigreseller"
+                        v-validate="'required'"
+                        data-vv-as="Harga Dua"
+                        step="any"/>
+
+                    <span
+                        class="control-error"
+                        v-text="errors.first(variantInputName + '[pricebigreseller]')"
+                        v-if="errors.has(variantInputName + '[pricebigreseller]')">
+                    </span>
+                </div>
+            </td>
+
+            <td>
                 <div :class="['control-group', errors.has(variantInputName + '[weight]') ? 'has-error' : '']">
                     <input
                         type="number"
@@ -343,6 +392,26 @@
 
         let super_attributes = @json(app('\Webkul\Product\Repositories\ProductRepository')->getSuperAttributes($product));
         let variants = @json($product->variants);
+
+        console.log(variants);
+
+        function saveGlobalValue() {
+            variants.forEach(variant => {
+                variant.name = $('input[name="name"]').val();
+
+                if ($('input[name="globalInputPrice"]').val() != '') {
+                    variant.price = $('input[name="globalInputPrice"]').val();
+                }
+
+                if ($('input[name="globalInputPriceTwo"]').val() != '') {
+                    variant.pricebigreseller = $('input[name="globalInputPriceTwo"]').val();
+                }
+
+                if ($('input[name="globalInputWeight"]').val() != '') {
+                    variant.weight = $('input[name="globalInputWeight"]').val();
+                }
+            });
+        }
 
         Vue.component('variant-form', {
             data: function () {

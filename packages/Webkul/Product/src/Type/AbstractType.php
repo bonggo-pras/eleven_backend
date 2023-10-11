@@ -202,6 +202,14 @@ abstract class AbstractType
             }
 
             if (
+                $attribute->type === 'pricebigreseller'
+                && isset($data[$attribute->code])
+                && $data[$attribute->code] === ''
+            ) {
+                $data[$attribute->code] = null;
+            }
+
+            if (
                 $attribute->type === 'date'
                 && $data[$attribute->code] === ''
                 && $route !== 'admin.catalog.products.massupdate'
