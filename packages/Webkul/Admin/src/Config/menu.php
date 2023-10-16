@@ -248,6 +248,24 @@ return [
         'sort'       => 3,
         'icon-class' => '',
     ], [
+        'key'        => 'marketing.rewards',
+        'name'       => 'Reward',
+        'route'      => 'admin.rewards.index',
+        'sort'       => 4,
+        'icon-class' => '',
+    ], [
+        'key'        => 'marketing.rewards.rewards',
+        'name'       => 'Reward',
+        'route'      => 'admin.rewards.index',
+        'sort'       => 1,
+        'icon-class' => '',
+    ], [
+        'key'        => 'marketing.rewards.customer-claims',
+        'name'       => 'Customer Claims',
+        'route'      => 'admin.events.index',
+        'sort'       => 2,
+        'icon-class' => '',
+    ], [
         'key'        => 'cms',
         'name'       => 'admin::app.layouts.cms',
         'route'      => 'admin.cms.index',
