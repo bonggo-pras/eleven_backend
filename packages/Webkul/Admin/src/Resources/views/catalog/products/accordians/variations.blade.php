@@ -137,7 +137,7 @@
                         <th>{{ __('admin::app.catalog.products.images') }}</th>
                         <th class="price">{{ __('admin::app.catalog.products.qty') }}</th>
                         <th class="qty">{{ __('admin::app.catalog.products.price') }}</th>
-                        <th class="qty">{{ __('admin::app.catalog.products.price') }}</th>
+                        <th class="qty">Harga 2</th>
                         <th class="weight">{{ __('admin::app.catalog.products.weight') }}</th>
                         <th class="status">{{ __('admin::app.catalog.products.status') }}</th>
                         <th class="actions"></th>
