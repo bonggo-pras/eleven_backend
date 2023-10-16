@@ -24,7 +24,7 @@ class Configurable extends AbstractType
      *
      * @var array
      */
-    protected $fillableTypes = ['sku', 'name', 'url_key', 'short_description', 'description', 'price', 'weight', 'status'];
+    protected $fillableTypes = ['sku', 'name', 'url_key', 'short_description', 'pricebigreseller', 'description', 'price', 'weight', 'status'];
 
     /**
      * These blade files will be included in product edit page.
@@ -382,7 +382,6 @@ class Configurable extends AbstractType
                 $productAttributeValue->update([$columnName => $data[$attribute->code]]);
             }
         }
-
         $this->productInventoryRepository->saveInventories($data, $variant);
 
         return $variant;
