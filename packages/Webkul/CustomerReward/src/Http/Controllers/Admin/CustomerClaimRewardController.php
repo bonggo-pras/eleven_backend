@@ -2,15 +2,19 @@
 
 namespace Webkul\CustomerReward\Http\Controllers\Admin;
 
+use Carbon\Carbon;
 use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Webkul\CustomerReward\DataGrids\CustomerClaimRewardDataGrid;
 use Webkul\CustomerReward\DataGrids\RewardDataGrid;
+use Webkul\CustomerReward\Models\PointHistory;
 use Webkul\CustomerReward\Models\Reward;
 
-class RewardController extends Controller
+class CustomerClaimRewardController extends Controller
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
@@ -41,45 +45,10 @@ class RewardController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            return app(RewardDataGrid::class)->toJson();
+            return app(CustomerClaimRewardDataGrid::class)->toJson();
         }
 
         return view($this->_config['view']);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function create()
-    {
-        return view($this->_config['view']);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required',
-            'point_required' => 'required|integer',
-            'stock' => 'required|integer',
-            'keterangan' => 'required',
-            'start' => 'required|date',
-            'end' => 'required|date',
-        ]);
-
-        $request->merge([
-            'status' => $request->status ?? 'non-active'
-        ]);
-
-        $reward = Reward::create($request->all());
-
-        return redirect()->route($this->_config['redirect']);
     }
 
     /**
@@ -88,12 +57,31 @@ class RewardController extends Controller
      * @param  int  $id
      * @return \Illuminate\View\View
      */
-    public function edit($id)
+    public function show($id)
     {
-        $reward = Reward::find($id);
+        $point_history = PointHistory::select([
+            'point_histories.id as id',
+            'customers.first_name',
+            'customers.last_name',
+            'customers.email',
+            'customers.gender',
+            'rewards.name as reward_name',
+            DB::raw('CONCAT(' . DB::getTablePrefix() . 'customers.first_name, " ", ' . DB::getTablePrefix() . 'customers.last_name) as full_name'),
+            'point_histories.status',
+            'point_histories.created_at as claim_at',
+            'point_histories.status',
+            'point_histories.shipment_at as shipment_at',
+            'point_histories.finish_shipment as finish_shipment',
+        ])
+        ->join('customers', 'point_histories.customer_id', 'customers.id')
+        ->leftJoin('rewards', 'point_histories.reward_id', 'rewards.id')
+        ->where([
+            'point_histories.type' => 'out',
+            'point_histories.id' => $id
+        ])->first();
 
         return view($this->_config['view'], [
-            'reward' => $reward
+            'point_histories' => $point_history
         ]);
     }
 
@@ -103,22 +91,28 @@ class RewardController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update($id)
+    public function saveShipment($id)
     {
-        $validated = request()->validate([
-            'name' => 'required',
-            'point_required' => 'required|integer',
-            'stock' => 'required|integer',
-            'keterangan' => 'required',
-            'start' => 'required|date',
-            'end' => 'required|date',
-        ]);
+        $claim = PointHistory::find($id);
+        $claim->status = 'on-shipment';
+        $claim->shipment_at = request()->shipment_at;
+        $claim->save();
 
-        request()->merge([
-            'status' => request()->status ?? 'non-active'
-        ]);
+        return redirect()->route($this->_config['redirect']);
+    }
 
-        $reward = Reward::where('id', $id)->update(request()->except('_token'));
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function finishReward($id)
+    {
+        $claim = PointHistory::find($id);
+        $claim->status = 'completed';
+        $claim->finish_shipment = Carbon::now();
+        $claim->save();
 
         return redirect()->route($this->_config['redirect']);
     }

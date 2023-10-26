@@ -262,7 +262,7 @@ return [
     ], [
         'key'        => 'marketing.rewards.customer-claims',
         'name'       => 'Customer Claims',
-        'route'      => 'admin.events.index',
+        'route'      => 'admin.claim-reward.index',
         'sort'       => 2,
         'icon-class' => '',
     ], [

@@ -66,7 +66,7 @@ class MarketingEarningDataGrid extends DataGrid
         ]);
 
         $this->addColumn([
-            'index'      => 'customer_id',
+            'index'      => 'full_name',
             'label'      => 'Nama Lengkap',
             'type'       => 'string',
             'searchable' => false,

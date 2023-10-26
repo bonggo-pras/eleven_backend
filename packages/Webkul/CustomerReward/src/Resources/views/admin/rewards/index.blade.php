@@ -13,7 +13,7 @@
 
             <div class="page-action">
                 @if (bouncer()->hasPermission('customers.groups.create'))
-                    <a href="{{ route('admin.rewards.add') }}" class="btn btn-lg btn-primary">
+                    <a href="{{ route('admin.rewards.create') }}" class="btn btn-lg btn-primary">
                         Add Reward
                     </a>
                 @endif
