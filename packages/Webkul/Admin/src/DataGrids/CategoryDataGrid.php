@@ -138,7 +138,7 @@ class CategoryDataGrid extends DataGrid
 
         $this->addColumn([
             'index'      => 'is_cat_child',
-            'label'      => trans('admin::app.datagrid.name'),
+            'label'      => 'Sub Category Status',
             'type'       => 'booleand',
             'searchable' => true,
             'sortable'   => true,
