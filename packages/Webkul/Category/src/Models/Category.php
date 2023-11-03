@@ -4,6 +4,7 @@ namespace Webkul\Category\Models;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
 use Kalnoy\Nestedset\NodeTrait;
@@ -76,6 +77,11 @@ class Category extends TranslatableModel implements CategoryContract
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(ProductProxy::modelClass(), 'product_categories');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo('Webkul\Category\Models\Category', 'parent_id');
     }
 
     /**

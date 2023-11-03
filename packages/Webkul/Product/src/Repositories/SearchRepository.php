@@ -41,6 +41,11 @@ class SearchRepository extends Repository
         return $this->productRepository->searchProductByAttribute($data['term'] ?? '');
     }
 
+    public function searchByCategory($id)
+    {
+        return $this->productRepository->getProductsRelatedToCategory($id);
+    }
+
     /**
      * @param  array  $data
      * @return void
