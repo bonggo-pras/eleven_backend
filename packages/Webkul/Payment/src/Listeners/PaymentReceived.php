@@ -27,10 +27,10 @@ class PaymentReceived
         $paymentStatus = $notification->transaction_status;
 
         $order = Order::where([
-            'increment_id' => $notification->order_id,
+            'id' => $notification->order_id,
             'status' => 'pending'
         ])->first();
-
+        
         if ($order) {
             if ($paymentStatus === 'capture' || $paymentStatus === 'settlement') {
                 $orderItems = $order->items()->get();
