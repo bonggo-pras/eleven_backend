@@ -28,7 +28,7 @@ class PointHistoryRepository extends Repository
     function getCustomerPointHistories($customerId)
     {
         if ($customerId != null) {
-            $pointCustomerHistories = $this->model->where('customer_id', $customerId)->with('customer')->get();
+            $pointCustomerHistories = $this->model->where('customer_id', $customerId)->with('customer')->orderBy('id', 'desc')->get();
 
             return $pointCustomerHistories;
         }
