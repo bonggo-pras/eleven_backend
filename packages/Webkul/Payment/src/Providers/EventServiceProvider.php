@@ -18,6 +18,6 @@ class EventServiceProvider extends ServiceProvider
 
         Event::listen('payment.midtrans.notification.received', 'Webkul\Payment\Listeners\PaymentReceived@updateOrder');
 
-        Event::listen('order.refund.after', 'Webkul\Payment\Listeners\RefundOrder@updatePointCustomer');
+        Event::listen('order.refund.after', 'Webkul\Payment\Listeners\RefundOrder@refundTransaction');
     }
 }

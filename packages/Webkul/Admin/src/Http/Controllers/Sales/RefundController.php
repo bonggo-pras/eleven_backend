@@ -113,6 +113,8 @@ class RefundController extends Controller
 
         $this->refundRepository->create(array_merge($data, ['order_id' => $orderId]));
 
+        Event::dispatch('order.refund.after', $orderId);
+
         session()->flash('success', trans('admin::app.response.create-success', ['name' => 'Refund']));
 
         return redirect()->route($this->_config['redirect']);

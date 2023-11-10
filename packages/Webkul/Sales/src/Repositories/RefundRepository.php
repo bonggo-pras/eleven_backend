@@ -157,7 +157,8 @@ class RefundRepository extends Repository
 
             $this->orderRepository->collectTotals($order);
 
-            $this->orderRepository->updateOrderStatus($order);
+            $order->status = "closed";
+            $order->save();
 
             Event::dispatch('sales.refund.save.after', $refund);
         } catch (\Exception $e) {

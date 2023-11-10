@@ -3,6 +3,7 @@
 namespace Webkul\Payment\Listeners;
 
 use Webkul\CustomerReward\Repositories\PointHistoryRepository;
+use Webkul\Midtrans\Refund;
 use Webkul\Sales\Models\Order;
 use Webkul\Sales\Repositories\InvoiceRepository;
 use Webkul\Sales\Repositories\OrderRepository;
@@ -15,16 +16,28 @@ class RefundOrder
 
     protected $pointHistoryRepository;
 
-    public function __construct(InvoiceRepository $invoiceRepository, OrderRepository $orderRepository, PointHistoryRepository $pointHistoryRepository)
+    protected $refund;
+
+    public function __construct(InvoiceRepository $invoiceRepository, OrderRepository $orderRepository, PointHistoryRepository $pointHistoryRepository, Refund $refund)
     {
         $this->invoiceRepository = $invoiceRepository;
         $this->orderRepository = $orderRepository;
         $this->pointHistoryRepository = $pointHistoryRepository;
+        $this->refund = $refund; 
     }
 
-    public function updatePointCustomer($order_id)
+    public function refundTransaction($orderId) 
     {
-        $getpoint = $this->pointHistoryRepository->canceledCustomerPoint($order_id);
+        $this->refund->createRefund($orderId);
+        
+        $this->updatePointCustomer($orderId);
+
+        return true;
+    }
+
+    public function updatePointCustomer($orderId)
+    {
+        $getpoint = $this->pointHistoryRepository->canceledCustomerPoint($orderId);
 
         return $getpoint;
     }
