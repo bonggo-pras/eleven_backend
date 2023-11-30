@@ -70,6 +70,7 @@ class CategoryDataGrid extends DataGrid
                 'cat.position',
                 'cat.status',
                 'ct.locale',
+                'cat.parent_id',
                 DB::raw('IFNULL(cat.parent_id, 0) as is_cat_child'),
                 DB::raw('COUNT(DISTINCT ' . DB::getTablePrefix() . 'pc.product_id) as count')
             )
@@ -144,7 +145,7 @@ class CategoryDataGrid extends DataGrid
             'sortable'   => true,
             'filterable' => true,
             'closure'    => function ($value) {
-                if ($value->is_cat_child == 0) {
+                if ($value->parent_id == 1 || $value->category_id == 1) {
                     return 'Parent Category';
                 } else {
                     return 'Child Category';
