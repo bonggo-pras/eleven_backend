@@ -11,9 +11,9 @@ Surat Jalan {{ $deliveryOrder->name }}
                 <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.deliveryorder.index') }}'"></i> Surat Jalan Pada Toko #{{ $deliveryOrder->store_name }}
             </h1>
         </div>
-
+        
         <div class="page-action">
-            <a href="" class="btn btn-lg btn-primary">
+            <a href="{{ route('admin.deliveryorder.print', $deliveryOrder->id) }}" class="btn btn-lg btn-primary">
                 Print Surat Jalan
             </a>
         </div>

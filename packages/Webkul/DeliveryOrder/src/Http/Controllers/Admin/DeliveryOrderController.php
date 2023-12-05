@@ -8,15 +8,17 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Webkul\Admin\DataGrids\DeliveryOrderDataGrid;
 use Webkul\DeliveryOrder\Models\DeliveryOrderItem;
 use Webkul\DeliveryOrder\Models\DeliveryOrder;
 use Webkul\Product\Models\Product;
+use Webkul\Core\Traits\PDFHandler;
 use Webkul\Sales\Repositories\ShipmentItemRepository;
 
 class DeliveryOrderController extends Controller
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests, PDFHandler;
 
     /**
      * Contains route related configuration
@@ -68,51 +70,52 @@ class DeliveryOrderController extends Controller
      */
     public function store(Request $request)
     {
-        $deliveryItems = [];
+        try {
+            $deliveryItems = [];
 
-        $deliveryOrder = DeliveryOrder::create([
-            'name' => $request->name,
-            'store_name' => $request->store_name,
-            'keterangan' => $request->keterangan,
-            'status' => $request->status,
-            'end' => $request->end,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now()
-        ]);
+            $deliveryOrder = DeliveryOrder::create([
+                'name' => $request->name,
+                'store_name' => $request->store_name,
+                'keterangan' => $request->keterangan,
+                'status' => $request->status,
+                'end' => $request->end,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]);
 
-        foreach ($request->productIds as $key => $productId) {
-            $inventory = Product::find($productId)->inventories()
-                ->where('vendor_id', 0)
-                ->first();
+            foreach ($request->productIds as $key => $productId) {
+                $inventory = Product::find($productId)->inventories()
+                    ->where('vendor_id', 0)
+                    ->first();
 
-            if ($inventory) {
-                $qty = $request->stocks[$key];
+                if ($inventory) {
+                    $qty = $request->stocks[$key];
 
-                if ($inventory->qty > $qty) {
-                    $arrayItem = [
-                        'delivery_order_id' => $deliveryOrder->id,
-                        'product_id' => $productId,
-                        'stock' => $qty,
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now()
-                    ];
+                    if ($inventory->qty > $qty) {
+                        $arrayItem = [
+                            'delivery_order_id' => $deliveryOrder->id,
+                            'product_id' => $productId,
+                            'stock' => $qty,
+                            'created_at' => Carbon::now(),
+                            'updated_at' => Carbon::now()
+                        ];
 
-                    if (($qty = $inventory->qty - $qty) < 0) {
-                        $qty = 0;
+                        if (($qty = $inventory->qty - $qty) < 0) {
+                            $qty = 0;
+                        }
+
+                        array_push($deliveryItems, $arrayItem);
+
+                        $inventory->update(['qty' => $qty]);
                     }
-
-                    array_push($deliveryItems, $arrayItem);
-
-                    $inventory->update(['qty' => $qty]);
                 }
             }
-        }
 
-        DeliveryOrderItem::insert($deliveryItems);
+            DeliveryOrderItem::insert($deliveryItems);
 
-        try {
+            session()->flash('success', 'Berhasil menambahkan surat jalan');
         } catch (\Throwable $th) {
-            //throw $th;
+            Log::error($th->getMessage());
         }
 
         return redirect()->route('admin.deliveryorder.index');
@@ -141,7 +144,10 @@ class DeliveryOrderController extends Controller
     {
         $deliveryOrder = DeliveryOrder::with(['items', 'items.productFlat'])->where('id', $id)->first();
 
-        return view($this->_config['view'], compact('deliveryOrder'));
+        return $this->downloadPDF(
+            view($this->_config['view'], compact('deliveryOrder'))->render(),
+            'delivery-order-' . $deliveryOrder->created_at->format('d-m-Y')
+        );
     }
 
     /**
@@ -162,5 +168,16 @@ class DeliveryOrderController extends Controller
      */
     public function destroy($id)
     {
+        try {
+            $deliveryOrder = DeliveryOrder::find($id);
+            $deliveryOrder->items()->delete();
+
+            $deliveryOrder->delete();
+            session()->flash('success', 'Berhasil menghapus surat jalan');
+
+            return redirect()->route($this->_config['redirect']);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+        }
     }
 }

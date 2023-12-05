@@ -22,4 +22,8 @@ Route::group([
     Route::get('/print/{id}', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@print')->defaults('_config', [
         'view' => 'deliveryorder::admin.print',
     ])->name('admin.deliveryorder.print');
+
+    Route::post('/print/delete/{id}', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@destroy')->defaults('_config', [
+        'redirect' => 'admin.deliveryorder.index',
+    ])->name('admin.deliveryorder.delete');
 });

@@ -110,18 +110,8 @@ class DeliveryOrderDataGrid extends DataGrid
         $this->addAction([
             'title'  => trans('admin::app.datagrid.delete'),
             'method' => 'POST',
-            'route'  => 'admin.cms.delete',
+            'route'  => 'admin.deliveryorder.delete',
             'icon'   => 'icon trash-icon',
-        ]);
-    }
-
-    public function prepareMassActions()
-    {
-        $this->addMassAction([
-            'type'   => 'delete',
-            'label'  => trans('admin::app.datagrid.delete'),
-            'action' => route('admin.cms.mass-delete'),
-            'method' => 'POST',
         ]);
     }
 }
