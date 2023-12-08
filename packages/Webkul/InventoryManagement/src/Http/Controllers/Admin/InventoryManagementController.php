@@ -109,7 +109,7 @@ class InventoryManagementController extends Controller
     
             InventoryManagementItem::insert($inventoryManagementItems);
     
-            session()->flash('success', 'Berhasil menambahkan surat jalan');
+            session()->flash('success', 'Berhasil memperbaharui stok');
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
         }
@@ -169,7 +169,7 @@ class InventoryManagementController extends Controller
             $inventoryManagement->items()->delete();
 
             $inventoryManagement->delete();
-            session()->flash('success', 'Berhasil menghapus surat jalan');
+            session()->flash('success', 'Berhasil menghapus stok');
 
             return redirect()->route($this->_config['redirect']);
         } catch (\Throwable $th) {
