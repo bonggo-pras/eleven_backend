@@ -118,7 +118,8 @@
             "Webkul\\Sitemap\\": "packages/Webkul/Sitemap/src",
             "Webkul\\Midtrans\\": "packages/Webkul/Midtrans/src",
             "Webkul\\CustomerReward\\": "packages/Webkul/CustomerReward/src",
-            "Webkul\\DeliveryOrder\\": "packages/Webkul/DeliveryOrder/src"
+            "Webkul\\DeliveryOrder\\": "packages/Webkul/DeliveryOrder/src",
+            "Webkul\\InventoryManagement\\": "packages/Webkul/InventoryManagement/src"
         }
     },
     "autoload-dev": {

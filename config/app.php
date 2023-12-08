@@ -286,7 +286,8 @@ return [
         Webkul\Sitemap\Providers\SitemapServiceProvider::class,
         Webkul\Midtrans\Providers\MidtransServiceProvider::class,
         Webkul\CustomerReward\Providers\CustomerRewardServiceProvider::class,
-        Webkul\DeliveryOrder\Providers\DeliveryOrderServiceProvider::class
+        Webkul\DeliveryOrder\Providers\DeliveryOrderServiceProvider::class,
+        Webkul\InventoryManagement\Providers\InventoryManagementServiceProvider::class
     ],
 
     /*

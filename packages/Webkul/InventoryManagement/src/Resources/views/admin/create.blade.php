@@ -1,24 +1,25 @@
 @extends('admin::layouts.content')
 
 @section('page_title')
-Buat Surat Jalan Baru
+Buat Inventory Management Baru
 @stop
 
 @section('content')
 <div class="content" id="app">
-    <form method="POST" action="{{ route('admin.deliveryorder.store') }}" @submit.prevent="onSubmit">
+    <form method="POST" action="{{ route('admin.inventorymanagement.store') }}" @submit.prevent="onSubmit">
+
         <div class="page-header">
             <div class="page-title">
                 <h1>
                     <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.customer.index') }}'"></i>
 
-                    Buat Surat Jalan Baru
+                    Buat Inventory Management Baru
                 </h1>
             </div>
 
             <div class="page-action">
                 <button type="submit" class="btn btn-lg btn-primary">
-                    Simpan Surat Jalan
+                    Simpan Inventory Management
                 </button>
             </div>
         </div>
@@ -31,12 +32,6 @@ Buat Surat Jalan Baru
                     <label for="name" class="required">Name</label>
                     <input type="text" class="control" id="name" name="name" v-validate="'required'" value="{{ old('name') }}">
                     <span class="control-error" v-if="errors.has('name')">@{{ errors.first('name') }}</span>
-                </div>
-
-                <div class="control-group" :class="[errors.has('store_name') ? 'has-error' : '']">
-                    <label for="store_name" class="required">Store Name</label>
-                    <input type="text" class="control" id="store_name" name="store_name" v-validate="'required'" value="{{ old('store_name') }}">
-                    <span class="control-error" v-if="errors.has('store_name')">@{{ errors.first('store_name') }}</span>
                 </div>
 
                 <div class="control-group" :class="[errors.has('keterangan') ? 'has-error' : '']">
@@ -91,7 +86,7 @@ Buat Surat Jalan Baru
                 <th>Nama Produk</th>
                 <th>Price</th>
                 <th>Status</th>
-                <th>Stok Keluar</th>
+                <th>Stok Masuk</th>
                 <th>Opsi</th>
             </thead>
             <tbody>
