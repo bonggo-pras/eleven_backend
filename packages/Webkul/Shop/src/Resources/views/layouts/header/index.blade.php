@@ -10,18 +10,6 @@
 <div class="header" id="header">
     <div class="header-top">
         <div class="left-content">
-            <ul class="logo-container">
-                <li>
-                    <a href="{{ route('shop.home.index') }}" aria-label="Logo">
-                        @if ($logo = core()->getCurrentChannel()->logo_url)
-                            <img class="logo" src="{{ $logo }}" alt="" />
-                        @else
-                            <img class="logo" src="{{ bagisto_asset('images/logo.svg') }}" alt="" />
-                        @endif
-                    </a>
-                </li>
-            </ul>
-
             <ul class="search-container">
                 <li class="search-group">
                     <form role="search" action="{{ route('shop.search.index') }}" method="GET" style="display: inherit;">

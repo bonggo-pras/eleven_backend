@@ -67,15 +67,29 @@ Buat Surat Jalan Baru
     <div class="form-container">
         <div class="control-group">
             <label for="cari">Cari barang disini</label>
-            <v-select :reduce="(option) => option" @input="myChangeEvent" :options="options" id="cari" style="width: 70%; margin-top: 10px;" :filterable="false" :options="options" @search="onSearch">
+            <v-select :reduce="(option) => option" @input="myChangeEvent" :options="options" id="cari" style="width: 70%; margin-top: 10px;" :filterable="false" @search="onSearch">
                 <template slot="no-options">
                     Ketikan nama produk...
                 </template>
                 <template slot="option" slot-scope="option">
                     @{{ option.name }}
-                    <div class="d-center" v-for="(variant, index) in option.variants" :key="index">
-                        @{{ variant.name }}
+                </template>
+                <template slot="selected-option" slot-scope="option">
+                    <div class="selected d-center">
+                        @{{ option.name }}
                     </div>
+                </template>
+            </v-select>
+        </div>
+
+        <div class="control-group" v-if="variants.length > 0">
+            <label for="cari">Cari variant barang disini</label>
+            <v-select :reduce="(option) => option" :options="variants" id="cariVariant" @input="selectedVariant" style="width: 70%; margin-top: 10px;">
+                <template slot="no-options">
+                    Ketikan nama produk...
+                </template>
+                <template slot="option" slot-scope="option">
+                    @{{ option.name }}
                 </template>
                 <template slot="selected-option" slot-scope="option">
                     <div class="selected d-center">
@@ -99,8 +113,9 @@ Buat Surat Jalan Baru
                     <input type="text" name="productIds[]" v-model="item.id" style="display: none;"> 
                     <td>@{{ index + 1 }}</td>
                     <td>@{{ item.name }}</td>
-                    <td>@{{ item.formatted_price }}</td>
-                    <td>@{{ item.in_stock ? "In Stock" : "Out Of Stock" }}</td>
+                    <td>@{{ item.formatted_price ? item.formatted_price : item.price }}</td>
+                    <td v-if="item.in_stock != null">@{{ item.in_stock ? "In Stock" : "Out Of Stock" }}</td>
+                    <td v-else>@{{ item.status ? "In Stock" : "Out Of Stock" }}</td>
                     <td style="width: 100px;"> <div class="control-group"><input type="number" class="control" name="stocks[]"></div> </td>
                     <td><span class="icon trash-icon" style="cursor: pointer;" v-on:click="deleteItem(item.id)"></span></td>
                 </tr>
@@ -118,6 +133,7 @@ Buat Surat Jalan Baru
                 newItem: '',
                 itemProducts: [],
                 options: [],
+                variants: [],
                 baseUrl: "{{ url('/') }}/api/v1/search?term="
             }
         },
@@ -126,6 +142,12 @@ Buat Surat Jalan Baru
                 if (search.length) {
                     loading(true);
                     this.search(loading, search, this);
+                }
+            },
+            onSearchVariant(search, loading) {
+                if (search.length) {
+                    loading(true);
+                    this.searchVariants(loading, search, this);
                 }
             },
             search: _.debounce((loading, search, vm) => {
@@ -137,10 +159,10 @@ Buat Surat Jalan Baru
                         vm.options = json.data;
                     });
 
-
                     loading(false);
                 });
             }, 350),
+            searchVariants: _.debounce((loading, search, vm) => {}, 350),
             addItem() {
                 if (this.newItem.trim() !== '') {
                     this.itemProducts.push(this.newItem);
@@ -148,11 +170,23 @@ Buat Surat Jalan Baru
                 }
             },
             myChangeEvent(item) {
-                console.log(item);
-                this.itemProducts.push(item);
+                if (item.type == 'configurable') {
+                    this.variants = item.variants;
+                } else {
+                    this.itemProducts.push(item);
+                }
+
+                console.log(this.variants, this.itemProducts);
             },
             deleteItem(value) {
                 this.itemProducts = this.itemProducts.filter(item => item.id !== value);
+            },
+            selectedVariant(item) {
+                const index = this.itemProducts.findIndex(object => object.id === item.id);
+
+                if (index === -1) {
+                    this.itemProducts.push(item);
+                }
             }
         }
     });

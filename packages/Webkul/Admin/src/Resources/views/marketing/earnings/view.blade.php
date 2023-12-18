@@ -1,6 +1,6 @@
 @extends('admin::layouts.master')
 @section('page_title')
-Marketing #{{ $marketing->first_name }} {{ $marketing->last_name }}
+Marketing #{{ $marketing->first_name ?? "Tidak Ditemukan" }} {{ $marketing->last_name ?? "" }}
 @stop
 
 @section('content-wrapper')
@@ -8,7 +8,7 @@ Marketing #{{ $marketing->first_name }} {{ $marketing->last_name }}
     <div class="page-header">
         <div class="page-title">
             <h1>
-                <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.marketings.earnings.index') }}'"></i> Marketing #{{ $marketing->first_name }} {{ $marketing->last_name }}
+                <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.marketings.earnings.index') }}'"></i> Marketing #{{ $marketing->first_name ?? "Tidak Ditemukan" }} {{ $marketing->last_name ?? "" }}
             </h1>
         </div>
     </div>
@@ -35,7 +35,7 @@ Marketing #{{ $marketing->first_name }} {{ $marketing->last_name }}
                                             </span>
 
                                             <span class="value">
-                                                {{ $marketing->first_name }}
+                                                {{ $marketing->first_name ?? "Tidak Ditemukan / Sudah dihapus" }}
                                             </span>
                                         </div>
 
@@ -47,7 +47,7 @@ Marketing #{{ $marketing->first_name }} {{ $marketing->last_name }}
                                             </span>
 
                                             <span class="value">
-                                                {{ $marketing->last_name }}
+                                                {{ $marketing->last_name ?? "Tidak Ditemukan / Sudah dihapus" }}
                                             </span>
                                         </div>
 
@@ -59,7 +59,7 @@ Marketing #{{ $marketing->first_name }} {{ $marketing->last_name }}
                                             </span>
 
                                             <span class="value">
-                                                {{ $marketing->email }}
+                                                {{ $marketing->email ?? "Tidak Ditemukan / Sudah dihapus" }}
                                             </span>
                                         </div>
 
@@ -90,7 +90,11 @@ Marketing #{{ $marketing->first_name }} {{ $marketing->last_name }}
                                             </span>
 
                                             <span class="value">
-                                                {{ $marketing->status ? 'Aktif' : 'Tidak Aktif' }}
+                                                @if ($marketing == null)
+                                                Tidak Ditemukan / Sudah dihapus
+                                                @else
+                                                {{ $marketing->status ? "Aktif" : "Tidak Aktif" }}
+                                                @endif
                                             </span>
                                         </div>
 
@@ -111,6 +115,16 @@ Marketing #{{ $marketing->first_name }} {{ $marketing->last_name }}
 
                                             <span class="value">
                                                 {{ $marketing->phone ?? "Tidak Disebutkan" }}
+                                            </span>
+                                        </div>
+
+                                        <div class="row">
+                                            <span class="title">
+                                                Referral Code
+                                            </span>
+
+                                            <span class="value">
+                                                {{ $marketing->referral_code ?? "Tidak Disebutkan" }}
                                             </span>
                                         </div>
 

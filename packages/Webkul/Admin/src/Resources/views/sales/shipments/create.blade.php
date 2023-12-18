@@ -149,7 +149,7 @@
                 </accordian>
                 @endif
 
-                <accordian title="{{ __('admin::app.sales.orders.payment-and-shipping') }}" :active="true">
+                <accordian title="{{ __('admin::app.sales.orders.payment-and-shipping') }}" :active="false">
                     <div slot="body">
                         <div class="sale">
                             <div class="sale-section">
@@ -208,12 +208,12 @@
 
                                     <div class="control-group" style="margin-top: 40px">
                                         <label for="shipment[carrier_title]">{{ __('admin::app.sales.shipments.carrier-title') }}</label>
-                                        <input type="text" class="control" id="shipment[carrier_title]" name="shipment[carrier_title]" />
+                                        <input type="text" class="control" value="0" id="shipment[carrier_title]" name="shipment[carrier_title]" />
                                     </div>
 
                                     <div class="control-group">
                                         <label for="shipment[track_number]">{{ __('admin::app.sales.shipments.tracking-number') }}</label>
-                                        <input type="text" class="control" id="shipment[track_number]" name="shipment[track_number]" />
+                                        <input type="text" class="control" value="0" id="shipment[track_number]" name="shipment[track_number]" />
                                     </div>
                                 </div>
                             </div>

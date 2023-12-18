@@ -129,12 +129,6 @@
                     </div>
                 </div>
 
-                @if (core()->getConfigData('sales.invoice_setttings.invoice_slip_design.logo'))
-                    <div class="image">
-                        <img class="logo" src="{{ Storage::url(core()->getConfigData('sales.invoice_setttings.invoice_slip_design.logo')) }}" alt=""/>
-                    </div>
-                @endif
-
                 <div class="merchant-details">
                     <div>
                         <span class="merchant-details-title">{{ core()->getConfigData('sales.shipping.origin.store_name') ? core()->getConfigData('sales.shipping.origin.store_name') : '' }}</span>
@@ -285,7 +279,6 @@
                                 <th class="text-center">{{ __('shop::app.customer.account.order.view.price') }}</th>
                                 <th class="text-center">{{ __('shop::app.customer.account.order.view.qty') }}</th>
                                 <th class="text-center">{{ __('shop::app.customer.account.order.view.subtotal') }}</th>
-                                <th class="text-center">{{ __('shop::app.customer.account.order.view.tax-amount') }}</th>
                                 <th class="text-center">{{ __('shop::app.customer.account.order.view.grand-total') }}</th>
                             </tr>
                         </thead>
@@ -315,8 +308,6 @@
 
                                     <td class="text-center">{{ core()->formatPrice($item->total, $invoice->order->order_currency_code) }}</td>
 
-                                    <td class="text-center">{{ core()->formatPrice($item->tax_amount, $invoice->order->order_currency_code) }}</td>
-
                                     <td class="text-center">{{ core()->formatPrice(($item->total + $item->tax_amount), $invoice->order->order_currency_code) }}</td>
                                 </tr>
                             @endforeach
@@ -344,12 +335,6 @@
                             <td>{{ core()->formatPrice($invoice->discount_amount, $invoice->order_currency_code) }}</td>
                         </tr>
                     @endif
-
-                    <tr>
-                        <td>{{ __('shop::app.customer.account.order.view.tax') }}</td>
-                        <td>-</td>
-                        <td>{{ core()->formatPrice($invoice->tax_amount, $invoice->order->order_currency_code) }}</td>
-                    </tr>
 
                     <tr>
                         <td colspan="3">

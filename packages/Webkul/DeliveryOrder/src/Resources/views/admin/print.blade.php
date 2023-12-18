@@ -136,12 +136,6 @@
                     <h1 class="text-center">Surat Jalan</h1>
                 </div>
             </div>
-
-            @if (core()->getConfigData('sales.invoice_setttings.invoice_slip_design.logo'))
-            <div class="image">
-                <img class="logo" src="{{ Storage::url(core()->getConfigData('sales.invoice_setttings.invoice_slip_design.logo')) }}" />
-            </div>
-            @endif
         </div>
 
         <div class="invoice-summary">

@@ -4,6 +4,7 @@ namespace Webkul\Admin\Http\Controllers\Sales;
 
 use Webkul\Admin\DataGrids\OrderShipmentsDataGrid;
 use Webkul\Admin\Http\Controllers\Controller;
+use Webkul\CustomerReward\Repositories\PointHistoryRepository;
 use Webkul\Sales\Repositories\OrderItemRepository;
 use Webkul\Sales\Repositories\OrderRepository;
 use Webkul\Sales\Repositories\ShipmentRepository;
@@ -28,10 +29,12 @@ class ShipmentController extends Controller
     public function __construct(
         protected ShipmentRepository $shipmentRepository,
         protected OrderRepository $orderRepository,
-        protected OrderItemRepository $orderItemRepository
+        protected OrderItemRepository $orderItemRepository, 
+        protected PointHistoryRepository $pointHistoryRepository
     )
     {
         $this->_config = request('_config');
+        $this->pointHistoryRepository = $pointHistoryRepository;
     }
 
     /**
@@ -100,9 +103,18 @@ class ShipmentController extends Controller
             'order_id' => $orderId,
         ]));
 
+        $this->updatePointCustomer($order);
+
         session()->flash('success', trans('admin::app.response.create-success', ['name' => 'Shipment']));
 
         return redirect()->route($this->_config['redirect'], $orderId);
+    }
+
+    public function updatePointCustomer($order)
+    {
+        $getpoint = $this->pointHistoryRepository->setCustomerPoint($order);
+
+        return $getpoint;
     }
 
     /**

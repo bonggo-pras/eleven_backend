@@ -479,6 +479,12 @@ class Cart
         $cartPayment = new CartPayment;
 
         $cartPayment->method = $payment['method'];
+        if ($payment['method'] == 'moneytransfer') {
+            $jsonAdditional = '{"bank":"BCA","bank_name":"Merry Lukito","bank_no":"4620499299"}';
+            $jsonArray = json_encode($jsonAdditional);
+
+            $cartPayment->additional = $jsonArray;
+        }
         $cartPayment->cart_id = $cart->id;
         $cartPayment->save();
 
