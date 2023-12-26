@@ -1,6 +1,6 @@
 @extends('admin::layouts.master')
 @section('page_title')
-Surat Jalan {{ $inventoryManagement->name }}
+Barang Masuk {{ $inventoryManagement->name }}
 @stop
 
 @section('content-wrapper')
@@ -8,13 +8,13 @@ Surat Jalan {{ $inventoryManagement->name }}
     <div class="page-header">
         <div class="page-title">
             <h1>
-                <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.inventorymanagement.index') }}'"></i> Surat Jalan Pada Toko #{{ $inventoryManagement->store_name }}
+                <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.inventorymanagement.index') }}'"></i> Barang Masuk #{{ $inventoryManagement->id }}
             </h1>
         </div>
         
         <div class="page-action">
             <a href="{{ route('admin.inventorymanagement.print', $inventoryManagement->id) }}" class="btn btn-lg btn-primary">
-                Print Surat Jalan
+                Print Barang Masuk
             </a>
         </div>
     </div>
@@ -23,10 +23,10 @@ Surat Jalan {{ $inventoryManagement->name }}
         <tabs>
             {!! view_render_event('admin.inventoryManagement.tabs.before', ['inventoryManagement' => $inventoryManagement]) !!}
 
-            <tab name="Surat Jalan Info" :selected="true">
+            <tab name="Barang Masuk Info" :selected="true">
                 <div class="sale-container">
 
-                    <accordian title="Detail Surat Jalan" :active="true">
+                    <accordian title="Detail Barang Masuk" :active="true">
                         <div slot="body">
                             <div class="sale">
                                 <div class="sale-section">
@@ -69,7 +69,7 @@ Surat Jalan {{ $inventoryManagement->name }}
                         </div>
                     </accordian>
 
-                    <accordian title="Tabel List Barang Keluar" :active="true">
+                    <accordian title="Tabel List Barang Masuk" :active="true">
                         <div slot="body">
                             <div class="table">
                                 <div class="table-responsive">
@@ -79,7 +79,7 @@ Surat Jalan {{ $inventoryManagement->name }}
                                                 <th>No</th>
                                                 <th>Nama Produk</th>
                                                 <th>Price</th>
-                                                <th>Stok Keluar</th>
+                                                <th>Stok Masuk</th>
                                             </tr>
                                         </thead>
                                         <tbody>
