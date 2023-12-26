@@ -43,8 +43,9 @@ class CustomerDataGrid extends DataGrid
                 'customers.phone',
                 'customers.gender',
                 'customers.status',
+                'customers.referral_code',
                 'customers.is_suspended',
-                'customer_groups.name as group',
+                'customer_groups.name as group'
             )
             ->addSelect(
                 DB::raw('CONCAT(' . DB::getTablePrefix() . 'customers.first_name, " ", ' . DB::getTablePrefix() . 'customers.last_name) as full_name')
@@ -134,6 +135,15 @@ class CustomerDataGrid extends DataGrid
                     return $row->gender;
                 }
             },
+        ]);
+
+        $this->addColumn([
+            'index'      => 'referral_code',
+            'label'      => 'Code Referral',
+            'type'       => 'string',
+            'searchable' => false,
+            'sortable'   => false,
+            'filterable' => false,
         ]);
 
         $this->addColumn([
