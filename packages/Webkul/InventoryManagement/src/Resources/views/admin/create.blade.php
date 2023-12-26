@@ -129,7 +129,7 @@ Buat Inventory Management Baru
                 itemProducts: [],
                 options: [],
                 variants: [],
-                baseUrl: "{{ url('/') }}/api/v1/search?term="
+                baseUrl: "{{ url('/') }}/api/v1/search?outStock=true&term="
             }
         },
         methods: {
