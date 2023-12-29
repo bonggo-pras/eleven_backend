@@ -99,6 +99,13 @@ class DeliveryOrderDataGrid extends DataGrid
     public function prepareActions()
     {
         $this->addAction([
+            'method' => 'GET',
+            'route'  => 'admin.deliveryorder.edit',
+            'icon'   => 'icon pencil-lg-icon',
+            'title'  => 'Edit Barang Keluar',
+        ]);
+
+        $this->addAction([
             'title'  => trans('admin::app.datagrid.view'),
             'method' => 'GET',
             'route'  => 'admin.deliveryorder.view',

@@ -18,6 +18,14 @@ Route::group([
     Route::get('/view/{id}', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@view')->defaults('_config', [
         'view' => 'deliveryorder::admin.view',
     ])->name('admin.deliveryorder.view');
+    
+    Route::get('/edit/{id}', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@edit')->defaults('_config', [
+        'view' => 'deliveryorder::admin.edit',
+    ])->name('admin.deliveryorder.edit');
+    
+    Route::post('/update/{id}', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@update')->defaults('_config', [
+        'redirect' => 'deliveryorder::admin.update',
+    ])->name('admin.deliveryorder.update');
 
     Route::get('/print/{id}', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@print')->defaults('_config', [
         'view' => 'deliveryorder::admin.print',

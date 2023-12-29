@@ -15,7 +15,7 @@ use Webkul\Product\Models\Product;
 use Illuminate\Support\Facades\Log;
 use Webkul\Core\Traits\PDFHandler;
 
-class InventoryManagementController extends Controller 
+class InventoryManagementController extends Controller
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests, PDFHandler;
 
@@ -71,7 +71,7 @@ class InventoryManagementController extends Controller
     {
         try {
             $inventoryManagementItems = [];
-    
+
             $inventoryManagement = InventoryManagement::create([
                 'name' => $request->name,
                 'keterangan' => $request->keterangan,
@@ -80,15 +80,15 @@ class InventoryManagementController extends Controller
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]);
-    
+
             foreach ($request->productIds as $key => $productId) {
                 $inventory = Product::find($productId)->inventories()
                     ->where('vendor_id', 0)
                     ->first();
-    
+
                 if ($inventory) {
                     $qty = $request->stocks[$key];
-    
+
                     $arrayItem = [
                         'inventory_management_id' => $inventoryManagement->id,
                         'product_id' => $productId,
@@ -96,19 +96,19 @@ class InventoryManagementController extends Controller
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ];
-    
+
                     if (($qty = $inventory->qty + $qty) < 0) {
                         $qty = 0;
                     }
-    
+
                     array_push($inventoryManagementItems, $arrayItem);
-    
+
                     $inventory->update(['qty' => $qty]);
                 }
             }
-    
+
             InventoryManagementItem::insert($inventoryManagementItems);
-    
+
             session()->flash('success', 'Berhasil memperbaharui stok');
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
@@ -146,14 +146,111 @@ class InventoryManagementController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\View\View
+     */
+    public function edit($id)
+    {
+        $inventoryManagement = InventoryManagement::with(['items', 'items.productFlat'])->where('id', $id)->first();
+
+        return view($this->_config['view'], compact('inventoryManagement'));
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update($id, Request $request)
     {
+        try {
+            $inventoryManagementItems = [];
 
+            $inventoryManagement = InventoryManagement::find($id);
+            $inventoryManagement->name = $request->name;
+            $inventoryManagement->keterangan = $request->keterangan;
+            $inventoryManagement->status = 'complete';
+            $inventoryManagement->end = $request->end;
+            $inventoryManagement->updated_at = Carbon::now();
+            $inventoryManagement->save();
+
+            foreach ($inventoryManagement->items as $key => $item) {
+                $productId = $item->product_id;
+
+                $inventory = Product::find($productId)->inventories()
+                    ->where('vendor_id', 0)
+                    ->first();
+
+                if ($inventory) {
+                    $qty = $request->stocks[$key];
+
+                    if (($qty = $inventory->qty - $qty) < 0) {
+                        $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
+                        session()->flash('error', $massage);
+
+                        return redirect()->back();
+                    }
+                }
+            }
+
+            foreach ($inventoryManagement->items as $key => $item) {
+                $productId = $item->product_id;
+
+                $inventory = Product::find($productId)->inventories()
+                    ->where('vendor_id', 0)
+                    ->first();
+
+                if ($inventory) {
+                    $qty = $item->stock;
+
+                    if (($qty = $inventory->qty - $qty) < 0) {
+                        $qty = 0;
+                    }
+
+                    $inventory->update(['qty' => $qty]);
+                }
+            }
+
+            // Mereset semua data yang berkaitan
+            InventoryManagementItem::where('inventory_management_id', $inventoryManagement->id)->delete();
+
+            foreach ($request->productIds as $key => $productId) {
+                $inventory = Product::find($productId)->inventories()
+                    ->where('vendor_id', 0)
+                    ->first();
+
+                if ($inventory) {
+                    $qty = $request->stocks[$key];
+
+                    $arrayItem = [
+                        'inventory_management_id' => $inventoryManagement->id,
+                        'product_id' => $productId,
+                        'stock' => $qty,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ];
+
+                    if (($qty = $inventory->qty + $qty) < 0) {
+                        $qty = 0;
+                    }
+
+                    array_push($inventoryManagementItems, $arrayItem);
+
+                    $inventory->update(['qty' => $qty]);
+                }
+            }
+
+            InventoryManagementItem::insert($inventoryManagementItems);
+
+            session()->flash('success', 'Berhasil memperbaharui stok');
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+        }
+
+        return redirect()->route('admin.inventorymanagement.index');
     }
 
     /**

@@ -22,6 +22,14 @@ Route::group([
         'view' => 'inventorymanagement::admin.print',
     ])->name('admin.inventorymanagement.print');
 
+    Route::get('/edit/{id}', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@edit')->defaults('_config', [
+        'view' => 'inventorymanagement::admin.edit',
+    ])->name('admin.inventorymanagement.edit');
+
+    Route::post('/update/{id}', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@update')->defaults('_config', [
+        'redirect' => 'admin.inventorymanagement.index',
+    ])->name('admin.inventorymanagement.update');
+
     Route::post('/print/delete/{id}', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@destroy')->defaults('_config', [
         'redirect' => 'admin.inventorymanagement.index',
     ])->name('admin.inventorymanagement.delete');

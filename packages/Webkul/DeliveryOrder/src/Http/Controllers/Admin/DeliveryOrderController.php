@@ -151,13 +151,112 @@ class DeliveryOrderController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\View\View
+     */
+    public function edit($id)
+    {
+        $deliveryOrder = DeliveryOrder::with(['items', 'items.productFlat'])->where('id', $id)->first();
+
+        return view($this->_config['view'], compact('deliveryOrder'));
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update($id)
+    public function update($id, Request $request)
     {
+        try {
+            $deliveryItems = [];
+
+            $deliveryOrder = DeliveryOrder::find($id);
+            $deliveryOrder->name = $request->name;
+            $deliveryOrder->store_name = $request->store_name;
+            $deliveryOrder->keterangan = $request->keterangan;
+            $deliveryOrder->status = 'complete';
+            $deliveryOrder->end = $request->end;
+            $deliveryOrder->updated_at = Carbon::now();
+            $deliveryOrder->save();
+
+            foreach ($deliveryOrder->items as $key => $item) {
+                $productId = $item->product_id;
+
+                $inventory = Product::find($productId)->inventories()
+                    ->where('vendor_id', 0)
+                    ->first();
+
+                if ($inventory) {
+                    $qty = $request->stocks[$key];
+
+                    if (($qty = $inventory->qty - $qty) < 0) {
+                        $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
+                        session()->flash('error', $massage);
+
+                        return redirect()->back();
+                    }
+                }
+            }
+
+            foreach ($deliveryOrder->items as $key => $item) {
+                $productId = $item->product_id;
+
+                $inventory = Product::find($productId)->inventories()
+                    ->where('vendor_id', 0)
+                    ->first();
+
+                if ($inventory) {
+                    $qty = $item->stock;
+
+                    if (($qty = $inventory->qty + $qty) < 0) {
+                        $qty = 0;
+                    }
+
+                    $inventory->update(['qty' => $qty]);
+                }
+            }
+
+            // Mereset semua data yang berkaitan
+            DeliveryOrderItem::where('delivery_order_id', $deliveryOrder->id)->delete();
+
+            foreach ($request->productIds as $key => $productId) {
+                $inventory = Product::find($productId)->inventories()
+                    ->where('vendor_id', 0)
+                    ->first();
+
+                if ($inventory) {
+                    $qty = $request->stocks[$key];
+
+                    $arrayItem = [
+                        'delivery_order_id' => $deliveryOrder->id,
+                        'product_id' => $productId,
+                        'stock' => $qty,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ];
+
+                    if (($qty = $inventory->qty - $qty) < 0) {
+                        $qty = 0;
+                    }
+
+                    array_push($deliveryItems, $arrayItem);
+
+                    $inventory->update(['qty' => $qty]);
+                }
+            }
+
+            DeliveryOrderItem::insert($deliveryItems);
+
+            session()->flash('success', 'Berhasil menambahkan surat jalan');
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+        }
+
+        return redirect()->route('admin.deliveryorder.index');
     }
 
     /**
