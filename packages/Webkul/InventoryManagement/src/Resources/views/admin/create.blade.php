@@ -109,8 +109,14 @@ Buat Inventory Management Baru
                     <td>@{{ index + 1 }}</td>
                     <td>@{{ item.name }}</td>
                     <td>@{{ item.formatted_price ? item.formatted_price : item.price }}</td>
+                    <div v-if="itemProducts.type == 'configurable'">
                     <td v-if="item.in_stock != null">@{{ item.in_stock ? "In Stock" : "Out Of Stock" }}</td>
                     <td v-else>@{{ item.status ? "In Stock" : "Out Of Stock" }}</td>
+                    </div>
+                    <div v-else>
+                    <td v-if="item.inventories">@{{ item.inventories[0]['qty'] > 0 ? "In Stock" : "Out Of Stock" }}</td>
+                    <td v-else>Maaf Sistem tidak dapat menemukan stok. <br> Silahkan cek manual pada tabel produk</td>
+                    </div>
                     <td style="width: 100px;"> <div class="control-group"><input type="number" class="control" name="stocks[]"></div> </td>
                     <td><span class="icon trash-icon" style="cursor: pointer;" v-on:click="deleteItem(item.id)"></span></td>
                 </tr>
@@ -180,6 +186,8 @@ Buat Inventory Management Baru
                 if (index === -1) {
                     this.itemProducts.push(item);
                 }
+
+                console.log(item, index, this.itemProducts);
             }
         }
     });
