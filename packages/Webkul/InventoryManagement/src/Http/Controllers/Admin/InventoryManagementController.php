@@ -189,13 +189,13 @@ class InventoryManagementController extends Controller
 
                     if ($qty < $item->stock) {
                         $qty = $qty - $item->stock;
-                    }
 
-                    if (($qty = $inventory->qty - $qty) < 0) {
-                        $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
-                        session()->flash('error', $massage);
-
-                        return redirect()->back();
+                        if (($qty = $inventory->qty - $qty) < 0) {
+                            $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
+                            session()->flash('error', $massage);
+    
+                            return redirect()->back();
+                        }
                     }
                 }
             }
