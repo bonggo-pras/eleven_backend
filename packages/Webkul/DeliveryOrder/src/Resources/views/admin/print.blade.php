@@ -150,6 +150,11 @@
             </div>
 
             <div class="row">
+                <span class="label">Nama toko -</span>
+                <span class="value">#{{ $deliveryOrder->store_name }}</span>
+            </div>
+
+            <div class="row">
                 <span class="label">Keterangan -</span>
                 <span class="value">#{{ $deliveryOrder->keterangan }}</span>
             </div>
