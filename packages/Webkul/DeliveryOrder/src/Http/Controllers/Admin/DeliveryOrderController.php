@@ -171,58 +171,63 @@ class DeliveryOrderController extends Controller
      */
     public function update($id, Request $request)
     {
-        try {
-            $deliveryItems = [];
+        $deliveryItems = [];
 
-            $deliveryOrder = DeliveryOrder::find($id);
-            $deliveryOrder->name = $request->name;
-            $deliveryOrder->store_name = $request->store_name;
-            $deliveryOrder->keterangan = $request->keterangan;
-            $deliveryOrder->status = 'complete';
-            $deliveryOrder->end = $request->end;
-            $deliveryOrder->updated_at = Carbon::now();
-            $deliveryOrder->save();
+        $deliveryOrder = DeliveryOrder::find($id);
+        $deliveryOrder->name = $request->name;
+        $deliveryOrder->store_name = $request->store_name;
+        $deliveryOrder->keterangan = $request->keterangan;
+        $deliveryOrder->status = 'complete';
+        $deliveryOrder->end = $request->end;
+        $deliveryOrder->updated_at = Carbon::now();
+        $deliveryOrder->save();
 
-            foreach ($deliveryOrder->items as $key => $item) {
-                $productId = $item->product_id;
-
+        if ($request->productIds != null) {
+            foreach ($request->productIds as $key => $productId) {
                 $inventory = Product::find($productId)->inventories()
                     ->where('vendor_id', 0)
                     ->first();
 
                 if ($inventory) {
+                    $item = $deliveryOrder->items->where('product_id', $productId)->first();
                     $qty = $request->stocks[$key];
 
-                    if (($qty = $inventory->qty - $qty) < 0) {
-                        $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
-                        session()->flash('error', $massage);
+                    if ($qty < $item->stock) {
+                        $qty = $qty - $item->stock;
+                        
+                        if (($qty = $inventory->qty - $qty) < 0) {
+                            $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
+                            session()->flash('error', $massage);
 
-                        return redirect()->back();
+                            return redirect()->back();
+                        }
                     }
                 }
             }
+        }
 
-            foreach ($deliveryOrder->items as $key => $item) {
-                $productId = $item->product_id;
+        foreach ($deliveryOrder->items as $key => $item) {
+            $productId = $item->product_id;
 
-                $inventory = Product::find($productId)->inventories()
-                    ->where('vendor_id', 0)
-                    ->first();
+            $inventory = Product::find($productId)->inventories()
+                ->where('vendor_id', 0)
+                ->first();
 
-                if ($inventory) {
-                    $qty = $item->stock;
+            if ($inventory) {
+                $qty = $item->stock;
 
-                    if (($qty = $inventory->qty + $qty) < 0) {
-                        $qty = 0;
-                    }
-
-                    $inventory->update(['qty' => $qty]);
+                if (($qty = $inventory->qty + $qty) < 0) {
+                    $qty = 0;
                 }
+
+                $inventory->update(['qty' => $qty]);
             }
+        }
 
-            // Mereset semua data yang berkaitan
-            DeliveryOrderItem::where('delivery_order_id', $deliveryOrder->id)->delete();
+        // Mereset semua data yang berkaitan
+        DeliveryOrderItem::where('delivery_order_id', $deliveryOrder->id)->delete();
 
+        if ($request->productIds != null) {
             foreach ($request->productIds as $key => $productId) {
                 $inventory = Product::find($productId)->inventories()
                     ->where('vendor_id', 0)
@@ -248,13 +253,11 @@ class DeliveryOrderController extends Controller
                     $inventory->update(['qty' => $qty]);
                 }
             }
-
-            DeliveryOrderItem::insert($deliveryItems);
-
-            session()->flash('success', 'Berhasil menambahkan surat jalan');
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
         }
+
+        DeliveryOrderItem::insert($deliveryItems);
+
+        session()->flash('success', 'Berhasil menambahkan surat jalan');
 
         return redirect()->route('admin.deliveryorder.index');
     }

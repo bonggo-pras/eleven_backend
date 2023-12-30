@@ -166,25 +166,24 @@ class InventoryManagementController extends Controller
      */
     public function update($id, Request $request)
     {
-        try {
-            $inventoryManagementItems = [];
+        $inventoryManagementItems = [];
 
-            $inventoryManagement = InventoryManagement::find($id);
-            $inventoryManagement->name = $request->name;
-            $inventoryManagement->keterangan = $request->keterangan;
-            $inventoryManagement->status = 'complete';
-            $inventoryManagement->end = $request->end;
-            $inventoryManagement->updated_at = Carbon::now();
-            $inventoryManagement->save();
+        $inventoryManagement = InventoryManagement::find($id);
+        $inventoryManagement->name = $request->name;
+        $inventoryManagement->keterangan = $request->keterangan;
+        $inventoryManagement->status = 'complete';
+        $inventoryManagement->end = $request->end;
+        $inventoryManagement->updated_at = Carbon::now();
+        $inventoryManagement->save();
 
-            foreach ($inventoryManagement->items as $key => $item) {
-                $productId = $item->product_id;
-
+        if ($request->productIds != null) {
+            foreach ($request->productIds as $key => $productId) {
                 $inventory = Product::find($productId)->inventories()
                     ->where('vendor_id', 0)
                     ->first();
 
                 if ($inventory) {
+                    $item = $inventoryManagement->items->where('product_id', $productId)->first();
                     $qty = $request->stocks[$key];
 
                     if ($qty < $item->stock) {
@@ -193,34 +192,36 @@ class InventoryManagementController extends Controller
                         if (($qty = $inventory->qty - $qty) < 0) {
                             $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
                             session()->flash('error', $massage);
-    
+
                             return redirect()->back();
                         }
                     }
                 }
             }
+        }
 
-            foreach ($inventoryManagement->items as $key => $item) {
-                $productId = $item->product_id;
+        foreach ($inventoryManagement->items as $key => $item) {
+            $productId = $item->product_id;
 
-                $inventory = Product::find($productId)->inventories()
-                    ->where('vendor_id', 0)
-                    ->first();
+            $inventory = Product::find($productId)->inventories()
+                ->where('vendor_id', 0)
+                ->first();
 
-                if ($inventory) {
-                    $qty = $item->stock;
+            if ($inventory) {
+                $qty = $item->stock;
 
-                    if (($qty = $inventory->qty - $qty) < 0) {
-                        $qty = 0;
-                    }
-
-                    $inventory->update(['qty' => $qty]);
+                if (($qty = $inventory->qty - $qty) < 0) {
+                    $qty = 0;
                 }
+
+                $inventory->update(['qty' => $qty]);
             }
+        }
 
-            // Mereset semua data yang berkaitan
-            InventoryManagementItem::where('inventory_management_id', $inventoryManagement->id)->delete();
+        // Mereset semua data yang berkaitan
+        InventoryManagementItem::where('inventory_management_id', $inventoryManagement->id)->delete();
 
+        if ($request->productIds != null) {
             foreach ($request->productIds as $key => $productId) {
                 $inventory = Product::find($productId)->inventories()
                     ->where('vendor_id', 0)
@@ -246,13 +247,11 @@ class InventoryManagementController extends Controller
                     $inventory->update(['qty' => $qty]);
                 }
             }
-
-            InventoryManagementItem::insert($inventoryManagementItems);
-
-            session()->flash('success', 'Berhasil memperbaharui stok');
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
         }
+
+        InventoryManagementItem::insert($inventoryManagementItems);
+
+        session()->flash('success', 'Berhasil memperbaharui stok');
 
         return redirect()->route('admin.inventorymanagement.index');
     }
