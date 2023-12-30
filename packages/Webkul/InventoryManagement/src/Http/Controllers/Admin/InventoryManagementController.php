@@ -178,16 +178,25 @@ class InventoryManagementController extends Controller
 
         if ($request->productIds != null) {
             foreach ($request->productIds as $key => $productId) {
+                $qty = $request->stocks[$key];
                 $inventory = Product::find($productId)->inventories()
                     ->where('vendor_id', 0)
                     ->first();
 
+                if ($qty > $inventory->qty) {
+                    $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
+                    session()->flash('error', $massage);
+
+                    return redirect()->back();
+                }
+
                 if ($inventory) {
                     $item = $inventoryManagement->items->where('product_id', $productId)->first();
-                    $qty = $request->stocks[$key];
 
-                    if ($qty < $item->stock) {
-                        $qty = $qty - $item->stock;
+                    if ($item) {
+                        if ($qty < $item->stock) {
+                            $qty = $qty - $item->stock;
+                        }
 
                         if (($qty = $inventory->qty - $qty) < 0) {
                             $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
