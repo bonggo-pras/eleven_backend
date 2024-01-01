@@ -141,7 +141,7 @@ class CategoryDataGrid extends DataGrid
             'index'      => 'is_cat_child',
             'label'      => 'Sub Category Status',
             'type'       => 'booleand',
-            'searchable' => true,
+            'searchable' => false,
             'sortable'   => true,
             'filterable' => true,
             'closure'    => function ($value) {
