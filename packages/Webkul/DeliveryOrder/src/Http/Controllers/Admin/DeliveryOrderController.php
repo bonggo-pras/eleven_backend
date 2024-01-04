@@ -91,7 +91,7 @@ class DeliveryOrderController extends Controller
                 if ($inventory) {
                     $qty = $request->stocks[$key];
 
-                    if ($inventory->qty > $qty) {
+                    if ($inventory->qty >= $qty) {
                         $arrayItem = [
                             'delivery_order_id' => $deliveryOrder->id,
                             'product_id' => $productId,
@@ -185,19 +185,21 @@ class DeliveryOrderController extends Controller
         if ($request->productIds != null) {
             foreach ($request->productIds as $key => $productId) {
                 $qty = $request->stocks[$key];
+                $item = $deliveryOrder->items->where('product_id', $productId)->first();
+                $productName = $item->productFlat->name ?? '';
                 $inventory = Product::find($productId)->inventories()
                     ->where('vendor_id', 0)
                     ->first();
 
-                if ($qty > $inventory->qty) {
-                    $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
-                    session()->flash('error', $massage);
-
-                    return redirect()->back();
-                }
-
                 if ($inventory) {
-                    $item = $deliveryOrder->items->where('product_id', $productId)->first();
+                    $inventoryAwal = $inventory->qty + $item->stock;   
+    
+                    if ($qty > $inventoryAwal) {
+                        $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $productName;
+                        session()->flash('error', $massage);
+    
+                        return redirect()->back();
+                    }
 
                     if ($item) {
                         if ($qty < $item->stock) {
@@ -205,7 +207,7 @@ class DeliveryOrderController extends Controller
                         }
 
                         if (($qty = $inventory->qty - $qty) < 0) {
-                            $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
+                            $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $productName;
                             session()->flash('error', $massage);
     
                             return redirect()->back();
