@@ -428,7 +428,7 @@
                         if (result) {
                             let self = this;
 
-                            let filteredVariants = variants.filter(function (variant) {
+                            let filteredVariants = productVariants.filter(function (variant) {
                                 let matchCount = 0;
 
                                 for (let key in self.variant) {
@@ -455,7 +455,7 @@
                                     optionIds.push(self.variant[key]);
                                 }
 
-                                variants.push(Object.assign({
+                                productVariants.push(Object.assign({
                                     sku: '{{ $product->sku }}' + '-variant-' + optionIds.join('-'),
                                     name: '',
                                     price: 0,
