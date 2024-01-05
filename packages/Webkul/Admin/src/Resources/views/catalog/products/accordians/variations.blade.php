@@ -380,7 +380,6 @@
             </td>
         </tr>
     </script>
-
     <script>
         $(document).ready(function () {
             Vue.config.ignoredElements = [
@@ -391,14 +390,10 @@
         });
 
         let super_attributes = @json(app('\Webkul\Product\Repositories\ProductRepository')->getSuperAttributes($product));
-        let variants = @json($product->variants);
-
-        console.log(variants);
+        let productVariants = @json($product->variants);
 
         function saveGlobalValue() {
-            variants.forEach(variant => {
-                variant.name = $('input[name="name"]').val();
-
+            productVariants.forEach(variant => {
                 if ($('input[name="globalInputPrice"]').val() != '') {
                     variant.price = $('input[name="globalInputPrice"]').val();
                 }
@@ -465,7 +460,8 @@
                                     name: '',
                                     price: 0,
                                     weight: 0,
-                                    status: 1
+                                    status: 1,
+                                    pricebigreseller: 0
                                 }, this.variant));
 
                                 this.resetModel();
@@ -493,7 +489,7 @@
 
             data: function () {
                 return {
-                    variants: variants,
+                    variants: productVariants,
 
                     old_variants: @json(old('variants')),
 
