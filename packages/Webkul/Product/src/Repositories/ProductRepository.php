@@ -235,6 +235,8 @@ class ProductRepository extends Repository
 
                     if (auth()->guard()->check()) {
                         $customerGroupId = auth()->guard()->user()->customer_group_id;
+                    } elseif (auth('sanctum')->check()) {
+                        $customerGroupId = auth('sanctum')->user()->customer_group_id;
                     } else {
                         $customerGuestGroup = app('Webkul\Customer\Repositories\CustomerGroupRepository')->getCustomerGuestGroup();
 
@@ -245,8 +247,7 @@ class ProductRepository extends Repository
 
                     $this->variantJoin($qb);
 
-                    $qb
-                        ->leftJoin('catalog_rule_product_prices', 'catalog_rule_product_prices.product_id', '=', 'variants.product_id')
+                    $qb->leftJoin('catalog_rule_product_prices', 'catalog_rule_product_prices.product_id', '=', 'variants.product_id')
                         ->leftJoin('product_customer_group_prices', 'product_customer_group_prices.product_id', '=', 'variants.product_id')
                         ->where(function ($qb) use ($priceRange, $customerGroupId) {
                             $qb->where(function ($qb) use ($priceRange) {
@@ -337,6 +338,33 @@ class ProductRepository extends Repository
             'path'  => request()->url(),
             'query' => request()->query(),
         ]);
+
+        return $results;
+    }
+
+    /**
+     * Returns newly added product.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getNewProductsApi()
+    {
+        $count = core()->getConfigData('catalog.products.homepage.no_of_new_product_homepage');
+
+        $results = app(ProductFlatRepository::class)->scopeQuery(function ($query) {
+            $channel = core()->getRequestedChannelCode();
+
+            $locale = core()->getRequestedLocaleCode();
+
+            return $query->distinct()
+                ->addSelect('product_flat.*')
+                ->where('product_flat.status', 1)
+                ->where('product_flat.visible_individually', 1)
+                ->where('product_flat.new', 1)
+                ->where('product_flat.channel', $channel)
+                ->where('product_flat.locale', $locale)
+                ->orderBy('product_flat.product_id', 'desc');
+        })->paginate($count ? $count : 4);
 
         return $results;
     }
