@@ -10,7 +10,7 @@ Edit Barang Masuk
         <div class="page-header">
             <div class="page-title">
                 <h1>
-                    <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.customer.index') }}'"></i>
+                    <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.inventorymanagement.index') }}'"></i>
 
                     Edit Barang Masuk
                 </h1>
@@ -78,7 +78,7 @@ Edit Barang Masuk
 
         <div class="control-group" v-if="variants.length > 0">
             <label for="cari">Cari variant barang disini</label>
-            <v-select :reduce="(option) => option" :options="variants" id="cariVariant" @input="selectedVariant" style="width: 70%; margin-top: 10px;">
+            <v-select :reduce="(option) => option" :options="variants" @input="selectedVariant" id="cariVariant" :filterable="true" id="cariVariant" :filter="searchVariants" style="width: 70%; margin-top: 10px;">
                 <template slot="no-options">
                     Ketikan nama produk...
                 </template>
@@ -179,7 +179,18 @@ Edit Barang Masuk
                     loading(false);
                 });
             }, 350),
-            searchVariants: _.debounce((loading, search, vm) => {}, 350),
+            searchVariants(options, search) {
+                return options.filter(option => {
+                    let label = option.name;
+                    if (typeof label === "number") {
+                        label = label.toString();
+                    }
+                    return this.filterBy(option, label, search);
+                });
+            },
+            filterBy(option, label, search) {
+                return (label || '').toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) > -1
+            },
             addItem() {
                 if (this.newItem.trim() !== '') {
                     this.itemProducts.push(this.newItem);
@@ -192,8 +203,6 @@ Edit Barang Masuk
                 } else {
                     this.itemProducts.push(item);
                 }
-
-                console.log(this.variants, this.itemProducts);
             },
             deleteItem(value) {
                 this.itemProducts = this.itemProducts.filter(item => item.id !== value);

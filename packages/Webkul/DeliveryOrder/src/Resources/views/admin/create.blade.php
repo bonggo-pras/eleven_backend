@@ -10,7 +10,7 @@ Buat Surat Jalan Baru
         <div class="page-header">
             <div class="page-title">
                 <h1>
-                    <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.customer.index') }}'"></i>
+                    <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.deliveryorder.index') }}'"></i>
 
                     Buat Surat Jalan Baru
                 </h1>
@@ -84,7 +84,7 @@ Buat Surat Jalan Baru
 
         <div class="control-group" v-if="variants.length > 0">
             <label for="cari">Cari variant barang disini</label>
-            <v-select :reduce="(option) => option" :options="variants" id="cariVariant" @input="selectedVariant" style="width: 70%; margin-top: 10px;">
+            <v-select :reduce="(option) => option" :options="variants" id="cariVariant" @input="selectedVariant" :filterable="true" id="cariVariant" :filter="searchVariants" style="width: 70%; margin-top: 10px;">
                 <template slot="no-options">
                     Ketikan nama produk...
                 </template>
@@ -150,12 +150,6 @@ Buat Surat Jalan Baru
                     this.search(loading, search, this);
                 }
             },
-            onSearchVariant(search, loading) {
-                if (search.length) {
-                    loading(true);
-                    this.searchVariants(loading, search, this);
-                }
-            },
             search: _.debounce((loading, search, vm) => {
                 vm.options = [];
                 fetch(`${vm.baseUrl}${escape(search)}`).then(res => {
@@ -168,7 +162,18 @@ Buat Surat Jalan Baru
                     loading(false);
                 });
             }, 350),
-            searchVariants: _.debounce((loading, search, vm) => {}, 350),
+            searchVariants(options, search) {
+                return options.filter(option => {
+                    let label = option.name;
+                    if (typeof label === "number") {
+                        label = label.toString();
+                    }
+                    return this.filterBy(option, label, search);
+                });
+            },
+            filterBy(option, label, search) {
+                return (label || '').toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) > -1
+            },
             addItem() {
                 if (this.newItem.trim() !== '') {
                     this.itemProducts.push(this.newItem);
@@ -181,8 +186,6 @@ Buat Surat Jalan Baru
                 } else {
                     this.itemProducts.push(item);
                 }
-
-                console.log(this.variants, this.itemProducts);
             },
             deleteItem(value) {
                 this.itemProducts = this.itemProducts.filter(item => item.id !== value);
@@ -193,6 +196,22 @@ Buat Surat Jalan Baru
                 if (index === -1) {
                     this.itemProducts.push(item);
                 }
+            },
+            formatRupiah(angka, prefix) {
+                let number_string = angka.replace(/[^,\d]/g, '').toString(),
+                    split = number_string.split(','),
+                    sisa = split[0].length % 3,
+                    rupiah = split[0].substr(0, sisa),
+                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                // tambahkan titik jika yang di input sudah menjadi angka ribuan
+                if (ribuan) {
+                    separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+
+                rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+                return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
             }
         }
     });
