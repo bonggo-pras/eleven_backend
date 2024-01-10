@@ -212,11 +212,13 @@ class InventoryManagementController extends Controller
         foreach ($inventoryManagement->items as $key => $item) {
             $productId = $item->product_id;
 
-            $inventory = Product::find($productId)->inventories()
+            $inventory = Product::find($productId);
+           
+            if ($inventory) {
+                $inventory->inventories()
                 ->where('vendor_id', 0)
                 ->first();
 
-            if ($inventory) {
                 $qty = $item->stock;
 
                 if (($qty = $inventory->qty - $qty) < 0) {
@@ -232,11 +234,13 @@ class InventoryManagementController extends Controller
 
         if ($request->productIds != null) {
             foreach ($request->productIds as $key => $productId) {
-                $inventory = Product::find($productId)->inventories()
-                    ->where('vendor_id', 0)
-                    ->first();
+                $inventory = Product::find($productId);
 
                 if ($inventory) {
+                    $inventory->inventories()
+                        ->where('vendor_id', 0)
+                        ->first();
+                        
                     $qty = $request->stocks[$key];
 
                     $arrayItem = [

@@ -122,7 +122,7 @@ Edit Surat Jalan Baru
                     <td v-if="item.inventories">@{{ item.inventories[0]['qty'] > 0 ? "In Stock" : "Out Of Stock" }}</td>
                     <td v-else><p style="text-align: center;">Maaf Sistem tidak dapat menemukan stok. <br> Silahkan cek manual pada tabel produk </p></td>
                     </span>
-                    <td style="width: 100px;"> <div class="control-group"><input type="number" class="control" v-model="itemProducts[index].stock" name="stocks[]"></div> </td>
+                    <td style="width: 100px;"> <div class="control-group"><input type="number" :id="'id-'+item.id" class="control" v-model="itemProducts[index].stock" name="stocks[]"></div> </td>
                     <td><span class="icon trash-icon" style="cursor: pointer;" v-on:click="deleteItem(item.id)"></span></td>
                 </tr>
                 <tr v-else><p style="text-align: center;">Kosong</p></tr>
@@ -150,8 +150,8 @@ Edit Surat Jalan Baru
             product.forEach((item) => {
                 const format = {
                     'id': item.product_id,
-                    'name': item.product_flat.name,
-                    'formatted_price': this.formatRupiah(item.product_flat.price, 'Rp'),
+                    'name': item.product_flat != null ? item.product_flat.name : 'Produk telah dihapus atau tidak ditemukan',
+                    'formatted_price': item.product_flat != null ? this.formatRupiah(item.product_flat.price, 'Rp') : 'Produk telah dihapus atau tidak ditemukan',
                     'stock': item.stock,
                 }
 
@@ -196,19 +196,49 @@ Edit Surat Jalan Baru
                 if (item.type == 'configurable') {
                     this.variants = item.variants;
                 } else {
+                    this.variants = [];
                     this.itemProducts.push(item);
-                }
 
-                console.log(this.variants, this.itemProducts);
+                    if (item != null) {
+                        const id = '#id-' + item.id;
+
+                        // Pastikan bahwa elemen dengan ID yang diinginkan sudah dirender oleh Vue
+                        this.$nextTick(() => {
+                            const inputElement = this.$el.querySelector(`${id}`);
+
+                            if (inputElement) {
+                                inputElement.focus();
+                            } else {
+                                console.error('Element dengan ID', id, 'tidak ditemukan');
+                            }
+                        });
+                    }
+                }
             },
             deleteItem(value) {
                 this.itemProducts = this.itemProducts.filter(item => item.id !== value);
             },
             selectedVariant(item) {
-                const index = this.itemProducts.findIndex(object => object.id === item.id);
+                if (item != null) {
+                    // Pastikan itemProducts dan item.id telah didefinisikan dan sesuai dengan harapan
+                    const index = this.itemProducts.findIndex(object => object.id === item.id);
 
-                if (index === -1) {
-                    this.itemProducts.push(item);
+                    if (index === -1) {
+                        this.itemProducts.push(item);
+                    }
+
+                    const id = '#id-' + item.id;
+
+                    // Pastikan bahwa elemen dengan ID yang diinginkan sudah dirender oleh Vue
+                    this.$nextTick(() => {
+                        const inputElement = this.$el.querySelector(`${id}`);
+
+                        if (inputElement) {
+                            inputElement.focus();
+                        } else {
+                            console.error('Element dengan ID', id, 'tidak ditemukan');
+                        }
+                    });
                 }
             },
             formatRupiah(angka, prefix) {

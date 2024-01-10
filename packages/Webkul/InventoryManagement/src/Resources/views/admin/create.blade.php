@@ -117,7 +117,7 @@ Buat Inventory Management Baru
                     <td v-if="item.inventories">@{{ item.inventories[0]['qty'] > 0 ? "In Stock" : "Out Of Stock" }}</td>
                     <td v-else>Maaf Sistem tidak dapat menemukan stok. <br> Silahkan cek manual pada tabel produk</td>
                     </div>
-                    <td style="width: 100px;"> <div class="control-group"><input type="number" class="control" name="stocks[]"></div> </td>
+                    <td style="width: 100px;"> <div class="control-group"><input type="number" :id="'id-'+item.id" class="control" name="stocks[]"></div> </td>
                     <td><span class="icon trash-icon" style="cursor: pointer;" v-on:click="deleteItem(item.id)"></span></td>
                 </tr>
                 <tr v-else><p style="text-align: center;">Kosong</p></tr>
@@ -174,20 +174,50 @@ Buat Inventory Management Baru
                 if (item.type == 'configurable') {
                     this.variants = item.variants;
                 } else {
+                    this.variants = [];
                     this.itemProducts.push(item);
+
+                    if (item != null) {
+                        const id = '#id-' + item.id;
+
+                        // Pastikan bahwa elemen dengan ID yang diinginkan sudah dirender oleh Vue
+                        this.$nextTick(() => {
+                            const inputElement = this.$el.querySelector(`${id}`);
+
+                            if (inputElement) {
+                                inputElement.focus();
+                            } else {
+                                console.error('Element dengan ID', id, 'tidak ditemukan');
+                            }
+                        });
+                    }
                 }
             },
             deleteItem(value) {
                 this.itemProducts = this.itemProducts.filter(item => item.id !== value);
             },
             selectedVariant(item) {
-                const index = this.itemProducts.findIndex(object => object.id === item.id);
+                if (item != null) {
+                    // Pastikan itemProducts dan item.id telah didefinisikan dan sesuai dengan harapan
+                    const index = this.itemProducts.findIndex(object => object.id === item.id);
 
-                if (index === -1) {
-                    this.itemProducts.push(item);
+                    if (index === -1) {
+                        this.itemProducts.push(item);
+                    }
+
+                    const id = '#id-' + item.id;
+
+                    // Pastikan bahwa elemen dengan ID yang diinginkan sudah dirender oleh Vue
+                    this.$nextTick(() => {
+                        const inputElement = this.$el.querySelector(`${id}`);
+
+                        if (inputElement) {
+                            inputElement.focus();
+                        } else {
+                            console.error('Element dengan ID', id, 'tidak ditemukan');
+                        }
+                    });
                 }
-
-                console.log(item, index, this.itemProducts);
             }
         }
     });

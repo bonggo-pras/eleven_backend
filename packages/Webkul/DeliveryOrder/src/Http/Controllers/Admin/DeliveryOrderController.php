@@ -187,17 +187,19 @@ class DeliveryOrderController extends Controller
                 $qty = $request->stocks[$key];
                 $item = $deliveryOrder->items->where('product_id', $productId)->first();
                 $productName = $item->productFlat->name ?? '';
-                $inventory = Product::find($productId)->inventories()
-                    ->where('vendor_id', 0)
-                    ->first();
+                $inventory = Product::find($productId);
 
                 if ($inventory) {
-                    $inventoryAwal = $inventory->qty + $item->stock;   
-    
+                    $inventory->inventories()
+                        ->where('vendor_id', 0)
+                        ->first();
+
+                    $inventoryAwal = $inventory->qty + $item->stock;
+
                     if ($qty > $inventoryAwal) {
                         $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $productName;
                         session()->flash('error', $massage);
-    
+
                         return redirect()->back();
                     }
 
@@ -209,7 +211,7 @@ class DeliveryOrderController extends Controller
                         if (($qty = $inventory->qty - $qty) < 0) {
                             $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $productName;
                             session()->flash('error', $massage);
-    
+
                             return redirect()->back();
                         }
                     }
@@ -220,11 +222,13 @@ class DeliveryOrderController extends Controller
         foreach ($deliveryOrder->items as $key => $item) {
             $productId = $item->product_id;
 
-            $inventory = Product::find($productId)->inventories()
-                ->where('vendor_id', 0)
-                ->first();
+            $inventory = Product::find($productId);
 
             if ($inventory) {
+                $inventory->inventories()
+                    ->where('vendor_id', 0)
+                    ->first();
+
                 $qty = $item->stock;
 
                 if (($qty = $inventory->qty + $qty) < 0) {
