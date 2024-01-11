@@ -7,8 +7,10 @@ use Illuminate\Support\Str;
 use Webkul\Checkout\Models\CartItem as CartItemModel;
 use Webkul\Product\Datatypes\CartItemValidationResult;
 use Webkul\Product\Facades\ProductImage;
+use Webkul\Product\Models\Product;
 use Webkul\Product\Models\ProductAttributeValue;
 use Webkul\Product\Models\ProductFlat;
+use Webkul\Product\Repositories\ProductCustomerGroupPriceRepository;
 
 class Configurable extends AbstractType
 {
@@ -159,7 +161,6 @@ class Configurable extends AbstractType
         $this->updateDefaultVariantId();
 
         $route = request()->route() ? request()->route()->getName() : '';
-
         if ($route != 'admin.catalog.products.massupdate') {
             $previousVariantIds = $product->variants->pluck('id');
 
@@ -190,6 +191,9 @@ class Configurable extends AbstractType
                 $this->productRepository->delete($variantId);
             }
         }
+
+        // Fitur otomatis update/create customer group price
+        $this->autoInsertCustomerGroupPrice($data);
 
         return $product;
     }
@@ -501,11 +505,12 @@ class Configurable extends AbstractType
      */
     public function getMinimalPrice($qty = null)
     {
-        static $minPrice = null;
+        // kode dibawah membuat $minprice selalu keluar sama walaupun beda $productId  
+        // static $minPrice = null;
 
-        if (! is_null($minPrice)) {
-            return $minPrice;
-        }
+        // if (! is_null($minPrice)) {
+        //     return $minPrice;
+        // }
 
         /* method is calling many time so using variable */
         $tablePrefix = DB::getTablePrefix();
@@ -540,11 +545,12 @@ class Configurable extends AbstractType
      */
     public function getOfferPrice()
     {
-        static $offerPrice = null;
+        // kode dibawah membuat $minprice selalu keluar sama walaupun beda $productId  
+        // static $offerPrice = null;
 
-        if (! is_null($offerPrice)) {
-            return $offerPrice;
-        }
+        // if (! is_null($offerPrice)) {
+        //     return $offerPrice;
+        // }
 
         $rulePrices = $customerGroupPrices = [];
 
@@ -589,11 +595,12 @@ class Configurable extends AbstractType
      */
     public function getMaximumPrice()
     {
-        static $maxPrice = null;
+        // kode dibawah membuat $minprice selalu keluar sama walaupun beda $productId  
+        // static $maxPrice = null;
 
-        if (! is_null($maxPrice)) {
-            return $maxPrice;
-        }
+        // if (! is_null($maxPrice)) {
+        //     return $maxPrice;
+        // }
 
         $productFlat = ProductFlat::join('products', 'product_flat.product_id', '=', 'products.id')
             ->distinct()
@@ -936,5 +943,24 @@ class Configurable extends AbstractType
         }
 
         return $total;
+    }
+
+    public function autoInsertCustomerGroupPrice($data) {
+        foreach ($data['variants'] as $variantId => $variantData) {
+            $priceBigReseller = $variantData['pricebigreseller'];
+
+            if ($priceBigReseller) {
+                $data['customer_group_prices'] = [
+                    $variantId => [
+                     'customer_group_id' => 3,
+                     "qty" => 1,
+                     "value_type" => "fixed",
+                     "value" => $priceBigReseller,
+                    ]
+                 ];
+            }
+        }
+
+        return $data;
     }
 }
