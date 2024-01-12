@@ -30,7 +30,7 @@ Add Reward
 
                 <div class="control-group" :class="[errors.has('name') ? 'has-error' : '']">
                     <label for="name" class="required">{{ __('admin::app.customers.groups.name') }}</label>
-                    <input v-validate="'required'" class="control" id="name" name="name" data-vv-as="&quot;{{ __('admin::app.customers.groups.name') }}&quot;" v-code />
+                    <input v-validate="'required'" class="control" id="name" name="name" data-vv-as="&quot;{{ __('admin::app.customers.groups.name') }}&quot;" />
                     <span class="control-error" v-if="errors.has('name')">@{{ errors.first('name') }}</span>
                 </div>
 
@@ -50,7 +50,7 @@ Add Reward
 
                 <div class="control-group" :class="[errors.has('keterangan') ? 'has-error' : '']">
                     <label for="keterangan" class="required">Keterangan</label>
-                    <input v-validate="'required'" class="control" id="keterangan" name="keterangan" data-vv-as="&quot;Keterangan&quot;" v-code />
+                    <input v-validate="'required'" class="control" id="keterangan" name="keterangan" data-vv-as="&quot;Keterangan&quot;" />
                     <span class="control-error" v-if="errors.has('keterangan')">@{{ errors.first('keterangan') }}</span>
                 </div>
 
