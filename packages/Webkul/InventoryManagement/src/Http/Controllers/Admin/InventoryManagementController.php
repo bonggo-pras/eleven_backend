@@ -14,6 +14,7 @@ use Webkul\InventoryManagement\Models\InventoryManagementItem;
 use Webkul\Product\Models\Product;
 use Illuminate\Support\Facades\Log;
 use Webkul\Core\Traits\PDFHandler;
+use Webkul\Product\Models\ProductInventory;
 
 class InventoryManagementController extends Controller
 {
@@ -178,28 +179,26 @@ class InventoryManagementController extends Controller
 
         if ($request->productIds != null) {
             foreach ($request->productIds as $key => $productId) {
-                $qty = $request->stocks[$key];
-                $inventory = Product::find($productId)->inventories()
-                    ->where('vendor_id', 0)
-                    ->first();
-
-                if ($qty > $inventory->qty) {
-                    $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
-                    session()->flash('error', $massage);
-
-                    return redirect()->back();
-                }
+                $reqQty = $request->stocks[$key];
+                $inventory = ProductInventory::where('product_id', $productId)->first();
+                $item = $inventoryManagement->items->where('product_id', $productId)->first();
+                $productName = $item->productFlat->name ?? '';
 
                 if ($inventory) {
-                    $item = $inventoryManagement->items->where('product_id', $productId)->first();
+                    if ($reqQty > $inventory->qty) {
+                        $massage = 'Stok barang kurang dari stok keluar: #' . $productName;
+                        session()->flash('error', $massage);
+    
+                        return redirect()->back();
+                    }
 
                     if ($item) {
-                        if ($qty < $item->stock) {
-                            $qty = $qty - $item->stock;
+                        if ($reqQty < $item->stock) {
+                            $reqQty = $reqQty - $item->stock;
                         }
 
-                        if (($qty = $inventory->qty - $qty) < 0) {
-                            $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $qty;
+                        if (($reqQty = $inventory->qty - $reqQty) < 0) {
+                            $massage = 'Ada perbedaan selisih pada barang: #' . $productName;
                             session()->flash('error', $massage);
 
                             return redirect()->back();
@@ -211,14 +210,9 @@ class InventoryManagementController extends Controller
 
         foreach ($inventoryManagement->items as $key => $item) {
             $productId = $item->product_id;
-
-            $inventory = Product::find($productId);
+            $inventory = ProductInventory::where('product_id', $productId)->first();
            
             if ($inventory) {
-                $inventory->inventories()
-                ->where('vendor_id', 0)
-                ->first();
-
                 $qty = $item->stock;
 
                 if (($qty = $inventory->qty - $qty) < 0) {
@@ -234,30 +228,25 @@ class InventoryManagementController extends Controller
 
         if ($request->productIds != null) {
             foreach ($request->productIds as $key => $productId) {
-                $inventory = Product::find($productId);
+                $inventory = ProductInventory::where('product_id', $productId)->first();
+                $reqQty = $request->stocks[$key];
 
                 if ($inventory) {
-                    $inventory->inventories()
-                        ->where('vendor_id', 0)
-                        ->first();
-                        
-                    $qty = $request->stocks[$key];
-
                     $arrayItem = [
                         'inventory_management_id' => $inventoryManagement->id,
                         'product_id' => $productId,
-                        'stock' => $qty,
+                        'stock' => $reqQty,
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ];
 
-                    if (($qty = $inventory->qty + $qty) < 0) {
-                        $qty = 0;
+                    if (($reqQty = $inventory->qty + $reqQty) < 0) {
+                        $reqQty = 0;
                     }
 
                     array_push($inventoryManagementItems, $arrayItem);
 
-                    $inventory->update(['qty' => $qty]);
+                    $inventory->update(['qty' => $reqQty]);
                 }
             }
         }

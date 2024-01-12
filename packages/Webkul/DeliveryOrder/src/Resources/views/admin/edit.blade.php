@@ -122,7 +122,7 @@ Edit Surat Jalan Baru
                     <td v-if="item.inventories">@{{ item.inventories[0]['qty'] > 0 ? "In Stock" : "Out Of Stock" }}</td>
                     <td v-else><p style="text-align: center;">Maaf Sistem tidak dapat menemukan stok. <br> Silahkan cek manual pada tabel produk </p></td>
                     </span>
-                    <td style="width: 100px;"> <div class="control-group"><input type="number" :id="'id-'+item.id" class="control" v-model="itemProducts[index].stock" name="stocks[]"></div> </td>
+                    <td style="width: 100px;"> <div class="control-group"><input type="number" min="1" :id="'id-'+item.id" class="control" v-model="itemProducts[index].stock" name="stocks[]"></div> </td>
                     <td><span class="icon trash-icon" style="cursor: pointer;" v-on:click="deleteItem(item.id)"></span></td>
                 </tr>
                 <tr v-else><p style="text-align: center;">Kosong</p></tr>

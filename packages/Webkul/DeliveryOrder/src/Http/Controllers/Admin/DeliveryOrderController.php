@@ -14,6 +14,7 @@ use Webkul\DeliveryOrder\Models\DeliveryOrderItem;
 use Webkul\DeliveryOrder\Models\DeliveryOrder;
 use Webkul\Product\Models\Product;
 use Webkul\Core\Traits\PDFHandler;
+use Webkul\Product\Models\ProductInventory;
 use Webkul\Sales\Repositories\ShipmentItemRepository;
 
 class DeliveryOrderController extends Controller
@@ -84,9 +85,7 @@ class DeliveryOrderController extends Controller
             ]);
 
             foreach ($request->productIds as $key => $productId) {
-                $inventory = Product::find($productId)->inventories()
-                    ->where('vendor_id', 0)
-                    ->first();
+                $inventory = ProductInventory::where('product_id', $productId)->first();
 
                 if ($inventory) {
                     $qty = $request->stocks[$key];
@@ -184,32 +183,24 @@ class DeliveryOrderController extends Controller
 
         if ($request->productIds != null) {
             foreach ($request->productIds as $key => $productId) {
-                $qty = $request->stocks[$key];
+                $reqQty = intval($request->stocks[$key]);
+                $inventory = ProductInventory::where('product_id', $productId)->first();
                 $item = $deliveryOrder->items->where('product_id', $productId)->first();
                 $productName = $item->productFlat->name ?? '';
-                $inventory = Product::find($productId);
 
                 if ($inventory) {
-                    $inventory->inventories()
-                        ->where('vendor_id', 0)
-                        ->first();
-
-                    $inventoryAwal = $inventory->qty + $item->stock;
-
-                    if ($qty > $inventoryAwal) {
-                        $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $productName;
+                    if ($reqQty > $inventory->qty) {
+                        $massage = 'Stok barang kurang dari stok keluar: #' . $productName;
                         session()->flash('error', $massage);
 
                         return redirect()->back();
                     }
 
                     if ($item) {
-                        if ($qty < $item->stock) {
-                            $qty = $qty - $item->stock;
-                        }
+                        $inventoryAwal = $inventory->qty + $item->stock;
 
-                        if (($qty = $inventory->qty - $qty) < 0) {
-                            $massage = 'Ada barang yang tidak bisa diedit stoknya: #' . $productName;
+                        if ($reqQty > $inventoryAwal) {
+                            $massage = 'Ada perbedaan selisih pada barang: #' . $productName;
                             session()->flash('error', $massage);
 
                             return redirect()->back();
@@ -222,13 +213,9 @@ class DeliveryOrderController extends Controller
         foreach ($deliveryOrder->items as $key => $item) {
             $productId = $item->product_id;
 
-            $inventory = Product::find($productId);
+            $inventory = ProductInventory::where('product_id', $productId)->first();
 
             if ($inventory) {
-                $inventory->inventories()
-                    ->where('vendor_id', 0)
-                    ->first();
-
                 $qty = $item->stock;
 
                 if (($qty = $inventory->qty + $qty) < 0) {
@@ -244,9 +231,7 @@ class DeliveryOrderController extends Controller
 
         if ($request->productIds != null) {
             foreach ($request->productIds as $key => $productId) {
-                $inventory = Product::find($productId)->inventories()
-                    ->where('vendor_id', 0)
-                    ->first();
+                $inventory = ProductInventory::where('product_id', $productId)->first();
 
                 if ($inventory) {
                     $qty = $request->stocks[$key];
