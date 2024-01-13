@@ -168,10 +168,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="text-center">No.</th>
+                            <th class="text-center" style="width: 50px;">No.</th>
                             <th class="text-center">Nama Produk</th>
-                            <th class="text-center">Price</th>
-                            <th class="text-center">Stok Keluar</th>
+                            <th class="text-center" style="width: 150px;">Price</th>
+                            <th class="text-center" style="width: 100px;">Stok Masuk</th>
                         </tr>
                     </thead>
 
