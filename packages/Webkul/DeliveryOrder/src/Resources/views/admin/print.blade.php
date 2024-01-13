@@ -8,7 +8,7 @@
 
     {{-- lang supports inclusion --}}
     <style type="text/css">
-        @font-face {
+       @font-face {
             font-family: 'Hind';
             src: url({{ asset('vendor/webkul/ui/assets/fonts/Hind/Hind-Regular.ttf') }}) format('truetype');
         }
@@ -55,7 +55,6 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            table-layout: fixed;
         }
 
         .table thead th {
@@ -125,6 +124,32 @@
         .logo {
             margin-left: 300px;
         }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .column1 {
+            width: 1em;
+            /* Sesuaikan lebar kolom sesuai kebutuhan */
+        }
+
+        .column3 {
+            width: 6em;
+            /* Sesuaikan lebar kolom sesuai kebutuhan */
+        }
+
+        .column4 {
+            width: 3em;
+            /* Sesuaikan lebar kolom sesuai kebutuhan */
+        }
     </style>
 </head>
 
@@ -170,30 +195,30 @@
             </div>
 
             <div class="table items">
-                <table>
+                <table style="width: 100%;">
                     <thead>
                         <tr>
-                            <th class="text-center" style="width: 50px;">No.</th>
-                            <th class="text-center">Nama Produk</th>
-                            <th class="text-center" style="width: 150px;">Price</th>
-                            <th class="text-center" style="width: 100px;">Stok Keluar</th>
+                            <th class="column1">No.</th>
+                            <th>Nama Produk</th>
+                            <th class="column3">Price</th>
+                            <th class="column4">Stok Keluar</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         @foreach ($deliveryOrder->items as $index => $item)
                         <tr>
-                            <td class="text-center">{{ $index + 1 }}</td>
-                            <td class="text-center">{{ $item->product->name }}</td>
-                            <td class="text-center">{{ core()->currency($item->productFlat->price) }}</td>
-                            <td class="text-center">{{ $item->stock }}</td>
+                            <td class="column1">{{ $index + 1 }}</td>
+                            <td>{{ $item->product->name }}</td>
+                            <td class="column3">{{ core()->currency($item->productFlat->price) }}</td>
+                            <td class="column4">{{ $item->stock }}</td>
                         </tr>
                         @endforeach
                         @if (!$deliveryOrder->items->count())
-                            <tr>
-                                <td class="empty" colspan="7">{{ __('admin::app.common.no-result-found') }}</td>
-                            <tr>
-                        @endif
+                        <tr>
+                            <td class="empty" colspan="7">{{ __('admin::app.common.no-result-found') }}</td>
+                        <tr>
+                            @endif
                     </tbody>
                 </table>
             </div>

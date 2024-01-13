@@ -85,12 +85,18 @@ Barang Masuk {{ $inventoryManagement->name }}
                                         <tbody>
 
                                             @foreach ($inventoryManagement->items as $index => $item)
+                                            @if ($item->product)
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
                                                 <td>{{ $item->product->name }}</td>
                                                 <td>{{ core()->currency($item->productFlat->price) }}</td>
                                                 <td>{{ $item->stock }}</td>
                                             </tr>
+                                            @elseif (!$item->product)
+                                                <tr>
+                                                    <td class="empty" colspan="7">Produk telah dihapus atau tidak ditemukan</td>
+                                                <tr>
+                                            @endif
                                             @endforeach
 
                                             @if (!$inventoryManagement->items->count())
