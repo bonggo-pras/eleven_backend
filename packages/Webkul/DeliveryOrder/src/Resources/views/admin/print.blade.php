@@ -141,6 +141,14 @@
             /* Sesuaikan lebar kolom sesuai kebutuhan */
         }
 
+        .column2 {
+            word-wrap: break-word;
+            max-width: 30em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            /* Sesuaikan lebar kolom sesuai kebutuhan */
+        }
+
         .column3 {
             width: 6em;
             /* Sesuaikan lebar kolom sesuai kebutuhan */
@@ -199,7 +207,7 @@
                     <thead>
                         <tr>
                             <th class="column1">No.</th>
-                            <th>Nama Produk</th>
+                            <th class="column2">Nama Produk</th>
                             <th class="column3">Price</th>
                             <th class="column4">Stok Keluar</th>
                         </tr>
@@ -207,16 +215,22 @@
 
                     <tbody>
                         @foreach ($deliveryOrder->items as $index => $item)
+                        @if ($item->product)
                         <tr>
                             <td class="column1">{{ $index + 1 }}</td>
-                            <td>{{ $item->product->name }}</td>
+                            <td class="column2">{{ $item->product->name }}</td>
                             <td class="column3">{{ core()->currency($item->productFlat->price) }}</td>
                             <td class="column4">{{ $item->stock }}</td>
                         </tr>
+                        @elseif (!$item->product)
+                            <tr>
+                                <td class="empty" colspan="4">Produk telah dihapus atau tidak ditemukan</td>
+                            <tr>
+                        @endif
                         @endforeach
                         @if (!$deliveryOrder->items->count())
                         <tr>
-                            <td class="empty" colspan="7">{{ __('admin::app.common.no-result-found') }}</td>
+                            <td class="empty" colspan="4">{{ __('admin::app.common.no-result-found') }}</td>
                         <tr>
                             @endif
                     </tbody>
