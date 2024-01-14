@@ -71,51 +71,53 @@ class DeliveryOrderController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $deliveryItems = [];
+        $deliveryItems = [];
 
-            $deliveryOrder = DeliveryOrder::create([
-                'name' => $request->name,
-                'store_name' => $request->store_name,
-                'keterangan' => $request->keterangan,
-                'status' => 'complete',
-                'end' => $request->end,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
-            ]);
+        $deliveryOrder = DeliveryOrder::create([
+            'name' => $request->name,
+            'store_name' => $request->store_name,
+            'keterangan' => $request->keterangan,
+            'status' => 'complete',
+            'end' => $request->end,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
 
-            foreach ($request->productIds as $key => $productId) {
-                $inventory = ProductInventory::where('product_id', $productId)->first();
+        foreach ($request->productIds as $key => $productId) {
+            $reqQty = intval($request->stocks[$key]);
+            $inventory = ProductInventory::where('product_id', $productId)->first();
 
-                if ($inventory) {
-                    $qty = $request->stocks[$key];
+            if ($inventory) {
+                if ($reqQty > $inventory->qty) {
+                    $massage = 'Stok barang kurang dari stok keluar: #';
+                    session()->flash('error', $massage);
 
-                    if ($inventory->qty >= $qty) {
-                        $arrayItem = [
-                            'delivery_order_id' => $deliveryOrder->id,
-                            'product_id' => $productId,
-                            'stock' => $qty,
-                            'created_at' => Carbon::now(),
-                            'updated_at' => Carbon::now()
-                        ];
+                    return redirect()->back();
+                }
 
-                        if (($qty = $inventory->qty - $qty) < 0) {
-                            $qty = 0;
-                        }
+                if ($inventory->qty >= $reqQty) {
+                    $arrayItem = [
+                        'delivery_order_id' => $deliveryOrder->id,
+                        'product_id' => $productId,
+                        'stock' => $reqQty,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ];
 
-                        array_push($deliveryItems, $arrayItem);
-
-                        $inventory->update(['qty' => $qty]);
+                    if (($reqQty = $inventory->qty - $reqQty) < 0) {
+                        $reqQty = 0;
                     }
+
+                    array_push($deliveryItems, $arrayItem);
+
+                    $inventory->update(['qty' => $reqQty]);
                 }
             }
-
-            DeliveryOrderItem::insert($deliveryItems);
-
-            session()->flash('success', 'Berhasil menambahkan surat jalan');
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
         }
+
+        DeliveryOrderItem::insert($deliveryItems);
+
+        session()->flash('success', 'Berhasil menambahkan surat jalan');
 
         return redirect()->route('admin.deliveryorder.index');
     }

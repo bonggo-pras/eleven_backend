@@ -29,19 +29,19 @@ Buat Surat Jalan Baru
 
                 <div class="control-group" :class="[errors.has('name') ? 'has-error' : '']">
                     <label for="name" class="required">Name</label>
-                    <input type="text" class="control" id="name" name="name" v-validate="'required'" value="{{ old('name') }}">
+                    <input type="text" class="control" id="name" name="name" v-validate="'required'" value="{{ old('name') }}" required>
                     <span class="control-error" v-if="errors.has('name')">@{{ errors.first('name') }}</span>
                 </div>
 
                 <div class="control-group" :class="[errors.has('store_name') ? 'has-error' : '']">
                     <label for="store_name" class="required">Store Name</label>
-                    <input type="text" class="control" id="store_name" name="store_name" v-validate="'required'" value="{{ old('store_name') }}">
+                    <input type="text" class="control" id="store_name" name="store_name" v-validate="'required'" value="{{ old('store_name') }}" required>
                     <span class="control-error" v-if="errors.has('store_name')">@{{ errors.first('store_name') }}</span>
                 </div>
 
                 <div class="control-group" :class="[errors.has('keterangan') ? 'has-error' : '']">
                     <label for="keterangan" class="required">Keterangan</label>
-                    <input type="text" class="control" id="keterangan" name="keterangan" v-validate="'required'" value="{{ old('name') }}">
+                    <input type="text" class="control" id="keterangan" name="keterangan" v-validate="'required'" value="{{ old('name') }}" required>
                     <span class="control-error" v-if="errors.has('name')">@{{ errors.first('name') }}</span>
                 </div>
 
@@ -122,7 +122,7 @@ Buat Surat Jalan Baru
                     <td v-if="item.inventories">@{{ item.inventories[0]['qty'] > 0 ? "In Stock" : "Out Of Stock" }}</td>
                     <td v-else>Maaf Sistem tidak dapat menemukan stok. <br> Silahkan cek manual pada tabel produk</td>
                     </div>
-                    <td style="width: 100px;"> <div class="control-group"><input type="number" min="1" :id="'id-'+item.id" class="control" name="stocks[]"></div> </td>
+                    <td style="width: 100px;"> <div class="control-group"><input type="number" min="1" :id="'id-'+item.id" class="control" name="stocks[]" required></div> </td>
                     <td><span class="icon trash-icon" style="cursor: pointer;" v-on:click="deleteItem(item.id)"></span></td>
                 </tr>
                 <tr v-else><p style="text-align: center;">Kosong</p></tr>

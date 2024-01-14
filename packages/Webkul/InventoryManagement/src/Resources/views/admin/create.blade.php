@@ -30,20 +30,20 @@ Buat Inventory Management Baru
 
                 <div class="control-group" :class="[errors.has('name') ? 'has-error' : '']">
                     <label for="name" class="required">Name</label>
-                    <input type="text" class="control" id="name" name="name" v-validate="'required'" value="{{ old('name') }}">
+                    <input type="text" class="control" id="name" name="name" v-validate="'required'" value="{{ old('name') }}" required>
                     <span class="control-error" v-if="errors.has('name')">@{{ errors.first('name') }}</span>
                 </div>
 
                 <div class="control-group" :class="[errors.has('keterangan') ? 'has-error' : '']">
                     <label for="keterangan" class="required">Keterangan</label>
-                    <input type="text" class="control" id="keterangan" name="keterangan" v-validate="'required'" value="{{ old('name') }}">
+                    <input type="text" class="control" id="keterangan" name="keterangan" v-validate="'required'" value="{{ old('keterangan') }}" required>
                     <span class="control-error" v-if="errors.has('name')">@{{ errors.first('name') }}</span>
                 </div>
 
                 <div class="control-group date">
                     <label for="end">Selesai</label>
                     <datetime>
-                        <input type="text" name="end" class="control" value="{{ old('end') }}" />
+                        <input type="text" name="end" class="control" value="{{ old('end') }}" required/>
                     </datetime>
                 </div>
                 <add-product></add-product>
@@ -117,7 +117,7 @@ Buat Inventory Management Baru
                     <td v-if="item.inventories">@{{ item.inventories[0]['qty'] > 0 ? "In Stock" : "Out Of Stock" }}</td>
                     <td v-else>Maaf Sistem tidak dapat menemukan stok. <br> Silahkan cek manual pada tabel produk</td>
                     </div>
-                    <td style="width: 100px;"> <div class="control-group"><input type="number" min="1" :id="'id-'+item.id" class="control" name="stocks[]"></div> </td>
+                    <td style="width: 100px;"> <div class="control-group"><input type="number" min="1" :id="'id-'+item.id" class="control" name="stocks[]" required></div> </td>
                     <td><span class="icon trash-icon" style="cursor: pointer;" v-on:click="deleteItem(item.id)"></span></td>
                 </tr>
                 <tr v-else><p style="text-align: center;">Kosong</p></tr>

@@ -70,51 +70,50 @@ class InventoryManagementController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $inventoryManagementItems = [];
+        $inventoryManagementItems = [];
 
-            $inventoryManagement = InventoryManagement::create([
-                'name' => $request->name,
-                'keterangan' => $request->keterangan,
-                'status' => 'complete',
-                'end' => $request->end,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
-            ]);
+        $inventoryManagement = InventoryManagement::create([
+            'name' => $request->name,
+            'keterangan' => $request->keterangan,
+            'status' => 'complete',
+            'end' => $request->end,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
 
-            foreach ($request->productIds as $key => $productId) {
-                $inventory = Product::find($productId)->inventories()
-                    ->where('vendor_id', 0)
-                    ->first();
+        foreach ($request->productIds as $key => $productId) {
+            $reqQty = intval($request->stocks[$key]);
+            $inventory = ProductInventory::where('product_id', $productId)->first();
 
-                if ($inventory) {
-                    $qty = $request->stocks[$key];
+            if ($inventory) {
+                if ($reqQty > $inventory->qty) {
+                    $massage = 'Stok barang kurang dari stok keluar: #';
+                    session()->flash('error', $massage);
 
-                    $arrayItem = [
-                        'inventory_management_id' => $inventoryManagement->id,
-                        'product_id' => $productId,
-                        'stock' => $qty,
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now()
-                    ];
-
-                    if (($qty = $inventory->qty + $qty) < 0) {
-                        $qty = 0;
-                    }
-
-                    array_push($inventoryManagementItems, $arrayItem);
-
-                    $inventory->update(['qty' => $qty]);
+                    return redirect()->back();
                 }
+
+                $arrayItem = [
+                    'inventory_management_id' => $inventoryManagement->id,
+                    'product_id' => $productId,
+                    'stock' => $reqQty,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ];
+
+                if (($reqQty = $inventory->qty + $reqQty) < 0) {
+                    $reqQty = 0;
+                }
+
+                array_push($inventoryManagementItems, $arrayItem);
+
+                $inventory->update(['qty' => $reqQty]);
             }
-
-            InventoryManagementItem::insert($inventoryManagementItems);
-
-            session()->flash('success', 'Berhasil memperbaharui stok');
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
         }
 
+        InventoryManagementItem::insert($inventoryManagementItems);
+
+        session()->flash('success', 'Berhasil memperbaharui stok');
         return redirect()->route('admin.inventorymanagement.index');
     }
 
@@ -188,7 +187,7 @@ class InventoryManagementController extends Controller
                     if ($reqQty > $inventory->qty) {
                         $massage = 'Stok barang kurang dari stok keluar: #' . $productName;
                         session()->flash('error', $massage);
-    
+
                         return redirect()->back();
                     }
 
@@ -211,7 +210,7 @@ class InventoryManagementController extends Controller
         foreach ($inventoryManagement->items as $key => $item) {
             $productId = $item->product_id;
             $inventory = ProductInventory::where('product_id', $productId)->first();
-           
+
             if ($inventory) {
                 $qty = $item->stock;
 
