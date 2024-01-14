@@ -86,13 +86,6 @@ class InventoryManagementController extends Controller
             $inventory = ProductInventory::where('product_id', $productId)->first();
 
             if ($inventory) {
-                if ($reqQty > $inventory->qty) {
-                    $massage = 'Stok barang kurang dari stok keluar: #';
-                    session()->flash('error', $massage);
-
-                    return redirect()->back();
-                }
-
                 $arrayItem = [
                     'inventory_management_id' => $inventoryManagement->id,
                     'product_id' => $productId,
@@ -184,13 +177,6 @@ class InventoryManagementController extends Controller
                 $productName = $item->productFlat->name ?? '';
 
                 if ($inventory) {
-                    if ($reqQty > $inventory->qty) {
-                        $massage = 'Stok barang kurang dari stok keluar: #' . $productName;
-                        session()->flash('error', $massage);
-
-                        return redirect()->back();
-                    }
-
                     if ($item) {
                         if ($reqQty < $item->stock) {
                             $reqQty = $reqQty - $item->stock;
