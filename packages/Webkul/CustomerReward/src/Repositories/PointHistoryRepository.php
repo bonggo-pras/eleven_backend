@@ -97,10 +97,10 @@ class PointHistoryRepository extends Repository
             'status' => 'approve'
         ])->first();
 
-        $customerId = $pointCustomerHistories->customer_id;
-        $totalPoint = $pointCustomerHistories->amount;
-
         if ($pointCustomerHistories) {
+            $customerId = $pointCustomerHistories->customer_id;
+            $totalPoint = $pointCustomerHistories->amount;
+
             $insertPoint = PointHistory::create([
                 'customer_id' => $customerId,
                 'order_id' => $pointCustomerHistories->order_id,
