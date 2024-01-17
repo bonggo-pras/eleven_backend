@@ -146,7 +146,7 @@ class InventoryManagementController extends Controller
      */
     public function edit($id)
     {
-        $inventoryManagement = InventoryManagement::with(['items', 'items.productFlat'])->where('id', $id)->first();
+        $inventoryManagement = InventoryManagement::with(['items', 'items.product', 'items.product.inventories', 'items.productFlat'])->where('id', $id)->first();
 
         return view($this->_config['view'], compact('inventoryManagement'));
     }

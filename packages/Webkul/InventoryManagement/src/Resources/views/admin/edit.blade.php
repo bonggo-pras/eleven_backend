@@ -99,23 +99,22 @@ Edit Barang Masuk
                 <th>Nama Produk</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Kuantiti</th>
                 <th>Stok Masuk</th>
                 <th>Opsi</th>
             </thead>
             <tbody>
-            <tr v-if="itemProducts.length > 0" v-for="(item, index) in itemProducts" :key="index" style="text-align: center;">
+                <tr v-if="itemProducts.length > 0" v-for="(item, index) in itemProducts" :key="index" style="text-align: center;">
                     <input type="text" name="productIds[]" v-model="item.id" style="display: none;"> 
                     <td>@{{ index + 1 }}</td>
                     <td>@{{ item.name }}</td>
                     <td>@{{ item.formatted_price ? item.formatted_price : item.price }}</td>
-                    <span v-if="itemProducts.type == 'configurable'">
-                    <td v-if="item.in_stock != null">@{{ item.in_stock ? "In Stock" : "Out Of Stock" }}</td>
-                    <td v-else>@{{ item.status ? "In Stock" : "Out Of Stock" }}</td>
-                    </span>
-                    <span v-else>
-                    <td v-if="item.inventories">@{{ item.inventories[0]['qty'] > 0 ? "In Stock" : "Out Of Stock" }}</td>
-                    <td v-else><p style="text-align: center;">Maaf Sistem tidak dapat menemukan stok. <br> Silahkan cek manual pada tabel produk </p></td>
-                    </span>
+                    <template>
+                        <td v-if="item.in_stock != null">@{{ item.in_stock ? "In Stock" : "Out Of Stock" }}</td>
+                            <td v-else>@{{ item.status ? "In Stock" : "Out Of Stock" }}</td>
+                        <td v-if="item.inventories">@{{ item.inventories[0]['qty'] }}</td>
+                            <td v-else>Maaf Sistem tidak dapat menemukan stok. <br> Silahkan cek manual pada tabel produk</td>
+                    </template>
                     <td style="width: 100px;"> <div class="control-group"><input type="number" min="1" :id="'id-'+item.id" class="control" v-model="itemProducts[index].stock" name="stocks[]"></div> </td>
                     <td><span class="icon trash-icon" style="cursor: pointer;" v-on:click="deleteItem(item.id)"></span></td>
                 </tr>
@@ -140,16 +139,38 @@ Edit Barang Masuk
         created: function() {
             const product = @json($inventoryManagement->items);
             let formatedProduct = [];
-
+            
             product.forEach((item) => {
-                const format = {
-                    'id': item.product_id,
-                    'name': item.product_flat != null ? item.product_flat.name : 'Produk telah dihapus atau tidak ditemukan',
-                    'formatted_price': item.product_flat != null ? this.formatRupiah(item.product_flat.price, 'Rp') : 'Produk telah dihapus atau tidak ditemukan',
-                    'stock': item.stock,
-                }
+                    let nama_product = 'Produk telah dihapus atau tidak ditemukan';
+                    let formatted_price = 'Produk telah dihapus atau tidak ditemukan';
+                    let in_stock = 'Produk telah dihapus atau tidak ditemukan';
+                    let inventories = false;
+                    let stock = item.stock;
 
-                formatedProduct.push(format);
+                    if (item.product_flat) {
+                        nama_product = item.product_flat.name != null ? item.product_flat.name : 'Produk telah dihapus atau tidak ditemukan';
+                        formatted_price = item.product_flat.price != null ? this.formatRupiah(item.product_flat.price, 'Rp') : 'Produk telah dihapus atau tidak ditemukan';
+                    }
+
+                    if (item.product) {
+                        if (item.product.inventories != null) {
+                            if (item.product.inventories.length > 0) {
+                                in_stock = item.product.inventories[0].qty > 0 ? true : false;
+                                inventories = item.product.inventories;
+                            }
+                        }
+                    }
+
+                    const format = {
+                        'id': item.product_id,
+                        'name': nama_product,
+                        'formatted_price': formatted_price,
+                        'in_stock': in_stock,
+                        'inventories': inventories,
+                        'stock': stock,
+                    }
+
+                    formatedProduct.push(format);
             });
 
             this.itemProducts = formatedProduct;

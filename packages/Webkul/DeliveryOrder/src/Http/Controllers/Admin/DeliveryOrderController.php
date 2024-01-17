@@ -161,7 +161,7 @@ class DeliveryOrderController extends Controller
      */
     public function edit($id)
     {
-        $deliveryOrder = DeliveryOrder::with(['items', 'items.productFlat'])->where('id', $id)->first();
+        $deliveryOrder = DeliveryOrder::with(['items', 'items.product', 'items.product.inventories', 'items.productFlat'])->where('id', $id)->first();
 
         return view($this->_config['view'], compact('deliveryOrder'));
     }
