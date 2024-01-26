@@ -90,6 +90,7 @@ class PointHistoryRepository extends Repository
     function canceledCustomerPoint($order_id)
     {
         $customerId = null;
+        $totalPoint = 0;
         $orderItemCollection = collect([]);
         $pointCustomerHistories = PointHistory::where([
             'order_id' => $order_id,
