@@ -238,7 +238,7 @@ class DeliveryOrderController extends Controller
                 $inventory = ProductInventory::where('product_id', $productId)->first();
 
                 if ($inventory) {
-                    $qty = $request->stocks[$key];
+                    $qty = intval($request->stocks[$key]);
 
                     $arrayItem = [
                         'delivery_order_id' => $deliveryOrder->id,
