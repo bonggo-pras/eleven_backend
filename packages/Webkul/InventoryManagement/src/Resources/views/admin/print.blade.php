@@ -62,7 +62,6 @@
             border-top: solid 1px #d3d3d3;
             border-bottom: solid 1px #d3d3d3;
             border-left: solid 1px #d3d3d3;
-            padding: 5px 10px;
             background: #F4F4F4;
         }
 
@@ -71,7 +70,6 @@
         }
 
         .table tbody td {
-            padding: 5px 10px;
             border-bottom: solid 1px #d3d3d3;
             border-left: solid 1px #d3d3d3;
             color: #3A3A3A;
@@ -121,10 +119,13 @@
             text-align: center;
         }
 
+        .logo {
+            margin-left: 300px;
+        }
+
         th,
         td {
             border: 1px solid #ddd;
-            padding: 8px;
             text-align: center;
         }
 
@@ -146,6 +147,7 @@
         }
 
         .column3 {
+            padding: 0px 20px;
             width: 6em;
             /* Sesuaikan lebar kolom sesuai kebutuhan */
         }
@@ -154,43 +156,47 @@
             width: 3em;
             /* Sesuaikan lebar kolom sesuai kebutuhan */
         }
+
+        .row {
+            display: flex;
+        }
     </style>
 </head>
 
 <body style="background-image: none; background-color: #fff;">
     <div class="container">
         <div class="header">
-            <div class="row">
-                <div class="col-12">
-                    <h1 class="text-center">Inventory Management</h1>
-                </div>
-            </div>
+            <h1 class="text-center">Inventory Management</h1>
         </div>
 
         <div class="invoice-summary">
             <div class="row">
-                <span class="label">Inventory Management ID -</span>
-                <span class="value">#{{ $inventoryManagement->id }}</span>
+               <div style="width: 20%;">
+                    <span class="label">Inventory Management ID -</span>
+                    <span class="value">#{{ $inventoryManagement->id }}</span>
+               </div>
+                <div style="width: 20%;">
+                    <span class="label">Status -</span>
+                    <span class="value">#{{ $inventoryManagement->status }}</span>
+                </div>
             </div>
 
             <div class="row">
-                <span class="label">Nama Inventory Management -</span>
-                <span class="value">#{{ $inventoryManagement->name }}</span>
+                <div style="width: 20%;">
+                    <span class="label">Nama Inventory Management -</span>
+                    <span class="value">#{{ $inventoryManagement->name }}</span>
+                </div>
+                <div style="width: 20%;">
+                    <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
+                    <span class="value">{{ core()->formatDate($inventoryManagement->created_at, 'd-m-Y') }}</span>
+                </div>
             </div>
 
             <div class="row">
-                <span class="label">Keterangan -</span>
-                <span class="value">#{{ $inventoryManagement->keterangan }}</span>
-            </div>
-
-            <div class="row">
-                <span class="label">Status -</span>
-                <span class="value">#{{ $inventoryManagement->status }}</span>
-            </div>
-
-            <div class="row">
-                <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
-                <span class="value">{{ core()->formatDate($inventoryManagement->created_at, 'd-m-Y') }}</span>
+                <div style="width: 20%;">
+                    <span class="label">Keterangan -</span>
+                    <span class="value">#{{ $inventoryManagement->keterangan }}</span>
+                </div>
             </div>
 
             <div class="table items">
