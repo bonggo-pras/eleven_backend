@@ -30,11 +30,11 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // $sliderData = $this->sliderRepository->getActiveSliders();
+        $sliderData = $this->sliderRepository->getActiveSliders();
 
-        // return view($this->_config['view'], compact('sliderData'));
+        return view($this->_config['view'], compact('sliderData'));
 
-        return redirect()->route('admin.session.index');
+        // return redirect()->route('admin.session.index');
     }
 
     /**

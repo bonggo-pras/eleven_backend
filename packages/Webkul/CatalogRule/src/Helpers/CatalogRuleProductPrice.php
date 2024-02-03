@@ -172,6 +172,8 @@ class CatalogRuleProductPrice
     {
         if (auth()->guard()->check()) {
             $customerGroupId = auth()->guard()->user()->customer_group_id;
+        } elseif (auth('sanctum')->check()) {
+            $customerGroupId = auth('sanctum')->user()->customer_group_id;
         } else {
             $customerGroup = $this->customerGroupRepository->getCustomerGuestGroup();
 

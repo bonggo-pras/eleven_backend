@@ -121,6 +121,9 @@
              .logo {
                 margin-left: 300px;
             }
+            .row {
+                display: flex;
+            }
         </style>
     </head>
 
@@ -171,13 +174,25 @@
 
             <div class="invoice-summary">
                 <div class="row">
-                    <span class="label">{{ __('admin::app.sales.invoices.invoice-id') }} -</span>
-                    <span class="value">#{{ $invoice->increment_id ?? $invoice->id }}</span>
+                    <div style="width: 20%;">
+                        <span class="label">{{ __('admin::app.sales.invoices.invoice-id') }} -</span>
+                        <span class="value">#{{ $invoice->increment_id ?? $invoice->id }}</span>
+                    </div>
+                    <div style="width: 20%;">
+                        <span class="label">{{ __('admin::app.sales.invoices.invoice-id') }} -</span>
+                        <span class="value">#{{ $invoice->increment_id ?? $invoice->id }}</span>
+                    </div>
                 </div>
 
                 <div class="row">
-                    <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
-                    <span class="value">{{ core()->formatDate($invoice->created_at, 'd-m-Y') }}</span>
+                    <div style="width: 20%;">
+                        <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
+                        <span class="value">{{ core()->formatDate($invoice->created_at, 'd-m-Y') }}</span>
+                    </div>
+                    
+                    <div style="width: 20%;">
+
+                    </div>
                 </div>
 
                 <div class="row">
@@ -312,3 +327,4 @@
         </div>
     </body>
 </html>
+@dd('tes')
