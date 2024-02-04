@@ -1,7 +1,4 @@
-<form
-    method="POST"
-    action="{{ route('admin.customer.update', $customer->id) }}"
-    @submit.prevent="onSubmit">
+<form method="POST" action="{{ route('admin.customer.update', $customer->id) }}" @submit.prevent="onSubmit">
     <div class="page-content">
         <div class="form-container">
             @csrf()
@@ -11,19 +8,19 @@
             <div class="style:overflow: auto;">&nbsp;</div>
 
             <div slot="body">
+
+                <div class="control-group">
+                    <label for="cus_marketing_full_name" class="required">Marketing By</label>
+
+                    <input type="text" class="control" id="cus_marketing_full_name" value="{{ $customer->cus_marketing_full_name }} - {{ $customer->marketing_code }}" disabled />
+                </div>
+
                 {!! view_render_event('bagisto.admin.customer.edit.form.before', ['customer' => $customer]) !!}
 
                 <div class="control-group" :class="[errors.has('first_name') ? 'has-error' : '']">
                     <label for="first_name" class="required"> {{ __('admin::app.customers.customers.first_name') }}</label>
 
-                    <input
-                        type="text"
-                        class="control"
-                        id="first_name"
-                        name="first_name"
-                        value="{{old('first_name') ?:$customer->first_name}}"
-                        v-validate="'required'"
-                        data-vv-as="&quot;{{ __('shop::app.customer.signup-form.firstname') }}&quot;"/>
+                    <input type="text" class="control" id="first_name" name="first_name" value="{{old('first_name') ?:$customer->first_name}}" v-validate="'required'" data-vv-as="&quot;{{ __('shop::app.customer.signup-form.firstname') }}&quot;" />
 
                     <span class="control-error" v-if="errors.has('first_name')">@{{ errors.first('first_name') }}</span>
                 </div>
@@ -33,14 +30,7 @@
                 <div class="control-group" :class="[errors.has('last_name') ? 'has-error' : '']">
                     <label for="last_name" class="required"> {{ __('admin::app.customers.customers.last_name') }}</label>
 
-                    <input
-                        type="text"
-                        class="control"
-                        id="last_name"
-                        name="last_name"
-                        value="{{old('last_name') ?:$customer->last_name}}"
-                        v-validate="'required'"
-                        data-vv-as="&quot;{{ __('shop::app.customer.signup-form.lastname') }}&quot;">
+                    <input type="text" class="control" id="last_name" name="last_name" value="{{old('last_name') ?:$customer->last_name}}" v-validate="'required'" data-vv-as="&quot;{{ __('shop::app.customer.signup-form.lastname') }}&quot;">
 
                     <span class="control-error" v-if="errors.has('last_name')">@{{ errors.first('last_name') }}</span>
                 </div>
@@ -50,14 +40,7 @@
                 <div class="control-group" :class="[errors.has('email') ? 'has-error' : '']">
                     <label for="email" class="required"> {{ __('admin::app.customers.customers.email') }}</label>
 
-                    <input
-                        type="email"
-                        class="control"
-                        id="email"
-                        name="email"
-                        value="{{old('email') ?:$customer->email}}"
-                        v-validate="'required|email'"
-                        data-vv-as="&quot;{{ __('shop::app.customer.signup-form.email') }}&quot;">
+                    <input type="email" class="control" id="email" name="email" value="{{old('email') ?:$customer->email}}" v-validate="'required|email'" data-vv-as="&quot;{{ __('shop::app.customer.signup-form.email') }}&quot;">
 
                     <span class="control-error" v-if="errors.has('email')">@{{ errors.first('email') }}</span>
                 </div>
@@ -67,13 +50,7 @@
                 <div class="control-group" :class="[errors.has('gender') ? 'has-error' : '']">
                     <label for="gender" class="required">{{ __('admin::app.customers.customers.gender') }}</label>
 
-                    <select
-                        class="control"
-                        id="gender"
-                        name="gender"
-                        value="{{ $customer->gender }}"
-                        v-validate="'required'"
-                        data-vv-as="&quot;{{ __('admin::app.customers.customers.gender') }}&quot;">
+                    <select class="control" id="gender" name="gender" value="{{ $customer->gender }}" v-validate="'required'" data-vv-as="&quot;{{ __('admin::app.customers.customers.gender') }}&quot;">
 
                         <option value="" {{ $customer->gender == "" ? 'selected' : '' }}>{{ __('admin::app.customers.customers.select-gender') }}</option>
                         <option value="{{ __('admin::app.customers.customers.male') }}" {{ $customer->gender == __('admin::app.customers.customers.male') ? 'selected' : '' }}>{{ __('admin::app.customers.customers.male') }}</option>
@@ -91,11 +68,7 @@
                     <label for="status" class="required">{{ __('admin::app.customers.customers.status') }}</label>
 
                     <label class="switch">
-                        <input
-                            type="checkbox"
-                            id="status"
-                            name="status"
-                            value="{{ $customer->status }}" {{ $customer->status ? 'checked' : '' }}>
+                        <input type="checkbox" id="status" name="status" value="{{ $customer->status }}" {{ $customer->status ? 'checked' : '' }}>
 
                         <span class="slider round"></span>
                     </label>
@@ -109,11 +82,7 @@
                     <label for="isSuspended" class="required">{{ __('admin::app.customers.customers.suspend') }}</label>
 
                     <label class="switch">
-                        <input
-                            id="isSuspended"
-                            type="checkbox"
-                            name="is_suspended"
-                            value="{{ $customer->is_suspended }}" {{ $customer->is_suspended ? 'checked' : '' }}>
+                        <input id="isSuspended" type="checkbox" name="is_suspended" value="{{ $customer->is_suspended }}" {{ $customer->is_suspended ? 'checked' : '' }}>
 
                         <span class="slider round"></span>
                     </label>
@@ -127,14 +96,7 @@
                     <label for="dob">{{ __('admin::app.customers.customers.date_of_birth') }}</label>
 
                     <date>
-                        <input
-                            type="date"
-                            class="control"
-                            id="dob"
-                            name="date_of_birth"
-                            value="{{ old('date_of_birth') ?:$customer->date_of_birth }}"
-                            v-validate=""
-                            data-vv-as="&quot;{{ __('admin::app.customers.customers.date_of_birth') }}&quot;">
+                        <input type="date" class="control" id="dob" name="date_of_birth" value="{{ old('date_of_birth') ?:$customer->date_of_birth }}" v-validate="" data-vv-as="&quot;{{ __('admin::app.customers.customers.date_of_birth') }}&quot;">
                     </date>
                     <span class="control-error" v-if="errors.has('date_of_birth')">@{{ errors.first('date_of_birth') }}</span>
                 </div>
@@ -144,14 +106,7 @@
                 <div class="control-group" :class="[errors.has('phone') ? 'has-error' : '']">
                     <label for="phone">{{ __('admin::app.customers.customers.phone') }}</label>
 
-                    <input
-                        type="text"
-                        class="control"
-                        id="phone"
-                        name="phone"
-                        value="{{ $customer->phone }}"
-                        v-validate="'numeric'"
-                        data-vv-as="&quot;{{ __('admin::app.customers.customers.phone') }}&quot;">
+                    <input type="text" class="control" id="phone" name="phone" value="{{ $customer->phone }}" v-validate="'numeric'" data-vv-as="&quot;{{ __('admin::app.customers.customers.phone') }}&quot;">
 
                     <span class="control-error" v-if="errors.has('phone')">@{{ errors.first('phone') }}</span>
                 </div>
@@ -159,19 +114,19 @@
                 {!! view_render_event('bagisto.admin.customer.edit.phone.after', ['customer' => $customer]) !!}
 
                 <div class="control-group">
-                    <label for="customerGroup" >{{ __('admin::app.customers.customers.customer_group') }}</label>
+                    <label for="customerGroup">{{ __('admin::app.customers.customers.customer_group') }}</label>
 
                     @if (! is_null($customer->customer_group_id))
-                        @php $selectedCustomerOption = $customer->group->id @endphp
+                    @php $selectedCustomerOption = $customer->group->id @endphp
                     @else
-                        @php $selectedCustomerOption = '' @endphp
+                    @php $selectedCustomerOption = '' @endphp
                     @endif
 
                     <select class="control" id="customerGroup" name="customer_group_id">
                         @foreach ($groups as $group)
-                            <option value="{{ $group->id }}" {{ $selectedCustomerOption == $group->id ? 'selected' : '' }}>
-                                {{ $group->name}}
-                            </option>
+                        <option value="{{ $group->id }}" {{ $selectedCustomerOption == $group->id ? 'selected' : '' }}>
+                            {{ $group->name}}
+                        </option>
                         @endforeach
                     </select>
                 </div>
