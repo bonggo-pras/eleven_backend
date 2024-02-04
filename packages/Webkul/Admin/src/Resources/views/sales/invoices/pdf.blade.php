@@ -132,7 +132,7 @@
             <div class="header">
                 <div class="row">
                     <div class="col-12">
-                        <h1 class="text-center">{{ __('admin::app.sales.invoices.invoice') }}</h1>
+                        <h1 class="text-center" style="margin: 0px 0px;">{{ __('admin::app.sales.invoices.invoice') }}</h1>
                     </div>
                 </div>
 
@@ -173,36 +173,52 @@
             </div>
 
             <div class="invoice-summary">
-                <div class="row">
-                    <div style="width: 20%;">
-                        <span class="label">{{ __('admin::app.sales.invoices.invoice-id') }} -</span>
-                        <span class="value">#{{ $invoice->increment_id ?? $invoice->id }}</span>
-                    </div>
-                    <div style="width: 20%;">
-                        <span class="label">{{ __('admin::app.sales.invoices.invoice-id') }} -</span>
-                        <span class="value">#{{ $invoice->increment_id ?? $invoice->id }}</span>
-                    </div>
-                </div>
+                <div class="table table payment-shipment">
+                    <table >
+                        <thead>
+                            <tr>
+                                <th style="width: 50%">{{ __('admin::app.sales.orders.order-info') }}</th>
+                                <th>{{ __('admin::app.sales.orders.account-info') }}</th>
+                            </tr>
+                        </thead>
 
-                <div class="row">
-                    <div style="width: 20%;">
-                        <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
-                        <span class="value">{{ core()->formatDate($invoice->created_at, 'd-m-Y') }}</span>
-                    </div>
-                    
-                    <div style="width: 20%;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="row">
+                                        <span class="label">{{ __('admin::app.sales.invoices.invoice-id') }} -</span>
+                                        <span class="value">#{{ $invoice->increment_id ?? $invoice->id }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
+                                        <span class="value">{{ core()->formatDate($invoice->created_at, 'd-m-Y') }}</span>
+                                    </div>
 
-                    </div>
-                </div>
+                                    <div class="row">
+                                        <span class="label">{{ __('admin::app.sales.invoices.order-id') }} -</span>
+                                        <span class="value">#{{ $invoice->order->increment_id }}</span>
+                                    </div>
 
-                <div class="row">
-                    <span class="label">{{ __('admin::app.sales.invoices.order-id') }} -</span>
-                    <span class="value">#{{ $invoice->order->increment_id }}</span>
-                </div>
+                                    <div class="row">
+                                        <span class="label">{{ __('admin::app.sales.invoices.order-date') }} -</span>
+                                        <span class="value">{{ $invoice->created_at->format('d-m-Y') }}</span>
+                                    </div>
+                                </td>
 
-                <div class="row">
-                    <span class="label">{{ __('admin::app.sales.invoices.order-date') }} -</span>
-                    <span class="value">{{ $invoice->created_at->format('d-m-Y') }}</span>
+                                <td>
+                                    <div class="row">
+                                        <span class="label">{{ __('admin::app.sales.orders.customer-name') }} -</span>
+                                        <span class="value">#{{ $invoice->order->customer_full_name }}</span>
+                                    </div>
+
+                                    <div class="row">
+                                        <span class="label">{{ __('admin::app.sales.orders.email') }} -</span>
+                                        <span class="value">#{{ $invoice->order->customer_email }}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 @if ($invoice->hasPaymentTerm())
@@ -291,7 +307,6 @@
                     </table>
                 </div>
 
-
                 <table class="sale-summary">
                     <tr>
                         <td>{{ __('admin::app.sales.orders.subtotal') }}</td>
@@ -327,4 +342,3 @@
         </div>
     </body>
 </html>
-@dd('tes')
