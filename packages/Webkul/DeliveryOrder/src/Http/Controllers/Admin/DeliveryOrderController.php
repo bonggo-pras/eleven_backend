@@ -109,14 +109,16 @@ class DeliveryOrderController extends Controller
                             $reqQty = 0;
                         }
 
-                        array_push($deliveryItems, $arrayItem);
+                        $deliveryOrderItem = DeliveryOrderItem::create($arrayItem);
 
-                        $inventory->update(['qty' => $reqQty]);
+                        if ($deliveryOrderItem) {
+                            $inventory->update(['qty' => $reqQty]);
+                        }
                     }
                 }
             }
 
-            DeliveryOrderItem::insert($deliveryItems);
+            // DeliveryOrderItem::insert($deliveryItems);
         }
 
         session()->flash('success', 'Berhasil menambahkan surat jalan');
@@ -274,16 +276,12 @@ class DeliveryOrderController extends Controller
      */
     public function destroy($id)
     {
-        try {
-            $deliveryOrder = DeliveryOrder::find($id);
-            $deliveryOrder->items()->delete();
+        $deliveryOrder = DeliveryOrder::find($id);
+        $deliveryOrder->items()->delete();
 
-            $deliveryOrder->delete();
-            session()->flash('success', 'Berhasil menghapus surat jalan');
+        $deliveryOrder->delete();
+        session()->flash('success', 'Berhasil menghapus surat jalan');
 
-            return redirect()->route($this->_config['redirect']);
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
-        }
+        return redirect()->route($this->_config['redirect']);
     }
 }
