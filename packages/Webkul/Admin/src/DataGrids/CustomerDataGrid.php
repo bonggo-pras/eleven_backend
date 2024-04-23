@@ -40,22 +40,24 @@ class CustomerDataGrid extends DataGrid
             ->addSelect(
                 'customers.id as customer_id',
                 'customers.email',
-                'customers.phone',
-                'customers.gender',
                 'customers.status',
                 'customers.referral_code',
                 'customers.is_suspended',
-                'customer_groups.name as group'
+                'customer_groups.name as group',
+                'marketing_reseller.id as marketingId',
             )
+            ->join('marketing_reseller', 'customers.id', '=', 'marketing_reseller.customer_id')
+            ->join('customers as cus_marketing', 'marketing_reseller.marketing_id', '=', 'cus_marketing.id')
             ->addSelect(
                 DB::raw('CONCAT(' . DB::getTablePrefix() . 'customers.first_name, " ", ' . DB::getTablePrefix() . 'customers.last_name) as full_name')
+            )
+            ->addSelect(
+                DB::raw('CONCAT(' . DB::getTablePrefix() . 'cus_marketing.first_name, " ", ' . DB::getTablePrefix() . 'cus_marketing.last_name) as cus_marketing_full_name')
             );
 
         $this->addFilter('customer_id', 'customers.id');
         $this->addFilter('full_name', DB::raw('CONCAT(' . DB::getTablePrefix() . 'customers.first_name, " ", ' . DB::getTablePrefix() . 'customers.last_name)'));
         $this->addFilter('group', 'customer_groups.name');
-        $this->addFilter('phone', 'customers.phone');
-        $this->addFilter('gender', 'customers.gender');
         $this->addFilter('status', 'status');
         $this->addFilter('is_suspended', 'customers.is_suspended');
 
@@ -106,40 +108,17 @@ class CustomerDataGrid extends DataGrid
         ]);
 
         $this->addColumn([
-            'index'      => 'phone',
-            'label'      => trans('admin::app.datagrid.phone'),
-            'type'       => 'number',
-            'searchable' => true,
-            'sortable'   => true,
-            'filterable' => false,
-            'closure'    => function ($row) {
-                if (! $row->phone) {
-                    return '-';
-                } else {
-                    return $row->phone;
-                }
-            },
-        ]);
-
-        $this->addColumn([
-            'index'      => 'gender',
-            'label'      => trans('admin::app.datagrid.gender'),
-            'type'       => 'string',
-            'searchable' => false,
-            'sortable'   => true,
-            'filterable' => false,
-            'closure'    => function ($row) {
-                if (! $row->gender) {
-                    return '-';
-                } else {
-                    return $row->gender;
-                }
-            },
-        ]);
-
-        $this->addColumn([
             'index'      => 'referral_code',
             'label'      => 'Code Referral',
+            'type'       => 'string',
+            'searchable' => false,
+            'sortable'   => false,
+            'filterable' => false,
+        ]);
+
+        $this->addColumn([
+            'index'      => 'cus_marketing_full_name',
+            'label'      => 'Marketing By',
             'type'       => 'string',
             'searchable' => false,
             'sortable'   => false,

@@ -193,8 +193,8 @@ Marketing #{{ $marketing->first_name ?? "Tidak Ditemukan" }} {{ $marketing->last
                                                 <td>{{ $order->full_name }}</td>
                                                 <td>{{ $order->created_at }}</td>
                                                 <td>{{ $order->total_item_count }}</td>
-                                                <td>{{ $order->amount }}</td>
-                                                <td>{{ $order->status }}</td>
+                                                <td>{{ $order->amount ?? 0 }}</td>
+                                                <td>{{ $order->status ?? 'pending'}}</td>
                                             </tr>
                                             @endforeach
 

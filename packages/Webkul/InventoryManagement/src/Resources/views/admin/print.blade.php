@@ -170,33 +170,47 @@
         </div>
 
         <div class="invoice-summary">
-            <div class="row">
-               <div style="width: 20%;">
-                    <span class="label">Inventory Management ID -</span>
-                    <span class="value">#{{ $inventoryManagement->id }}</span>
-               </div>
-                <div style="width: 20%;">
-                    <span class="label">Status -</span>
-                    <span class="value">#{{ $inventoryManagement->status }}</span>
-                </div>
-            </div>
+        <div class="table payment-shipment">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2">Informasi Surat Jalan</th>
+                        </tr>
+                    </thead>
 
-            <div class="row">
-                <div style="width: 20%;">
-                    <span class="label">Nama Inventory Management -</span>
-                    <span class="value">#{{ $inventoryManagement->name }}</span>
-                </div>
-                <div style="width: 20%;">
-                    <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
-                    <span class="value">{{ core()->formatDate($inventoryManagement->created_at, 'd-m-Y') }}</span>
-                </div>
-            </div>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="row">
+                                    <span class="label">Inventory Management ID -</span>
+                                    <span class="value">#{{ $inventoryManagement->id }}</span>
+                                </div>
 
-            <div class="row">
-                <div style="width: 20%;">
-                    <span class="label">Keterangan -</span>
-                    <span class="value">#{{ $inventoryManagement->keterangan }}</span>
-                </div>
+                                <div class="row">
+                                    <span class="label">Status -</span>
+                                    <span class="value">#{{ $inventoryManagement->status }}</span>
+                                </div>
+
+                                <div class="row">
+                                    <span class="label">Nama Inventory Management -</span>
+                                    <span class="value">#{{ $inventoryManagement->name }}</span>
+                                </div>
+
+                                <div class="row">
+                                    <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
+                                    <span class="value">{{ core()->formatDate($inventoryManagement->created_at, 'd-m-Y') }}</span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="row">
+                                    <span class="label">Keterangan</span>
+                                    <span class="value">#{{ $inventoryManagement->keterangan }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="table items">

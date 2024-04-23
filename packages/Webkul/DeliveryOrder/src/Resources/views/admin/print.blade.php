@@ -98,6 +98,7 @@
         }
 
         .label {
+            text-align: left;
             color: #000;
             font-weight: bold;
         }
@@ -166,44 +167,57 @@
 <body style="background-image: none; background-color: #fff;">
     <div class="container">
         <div class="header">
-            <h1 class="text-center">Surat Jalan</h1>
+            <h1 class="text-center" style="margin: 0px 0px;">Surat Jalan</h1>
         </div>
 
         <div class="invoice-summary">
-            <div class="row">
-               <div style="width: 20%;">
-                    <span class="label">Surat Jalan ID -</span>
-                    <span class="value">#{{ $deliveryOrder->id }}</span>
-               </div>
-               <div style="width: 20%;">
-                    <span class="label">Keterangan -</span>
-                    <span class="value">#{{ $deliveryOrder->keterangan }}</span>
-               </div>
-            </div>
+            <div class="table payment-shipment">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">Informasi Surat Jalan</th>
+                            <th style="width: 50%">Informasi Toko</th>
+                        </tr>
+                    </thead>
 
-            <div class="row">
-                <div style="width: 20%;">
-                    <span class="label">Nama surat jalan -</span>
-                    <span class="value">#{{ $deliveryOrder->name }}</span>
-                </div>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="row">
+                                    <span class="label">Surat Jalan ID -</span>
+                                    <span class="value">#{{ $deliveryOrder->id }}</span>
+                                </div>
 
-                <div style="width: 20%;">
-                    <span class="label">Status -</span>
-                    <span class="value">#{{ $deliveryOrder->status }}</span>
-               </div>
-            </div>
+                                <div class="row">
+                                    <span class="label">Keterangan -</span>
+                                    <span class="value">#{{ $deliveryOrder->keterangan }}</span>
+                                </div>
 
-            <div class="row">
-                <div style="width: 20%;">
-                    <span class="label">Nama toko -</span>
-                    <span class="value">#{{ $deliveryOrder->store_name }}</span>
-                </div>
+                                <div class="row">
+                                    <span class="label">Nama surat jalan -</span>
+                                    <span class="value">#{{ $deliveryOrder->name }}</span>
+                                </div>
 
-                <div style="width: 20%;">
-                    <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
-                    <span class="value">{{ core()->formatDate($deliveryOrder->created_at, 'd-m-Y') }}</span>
-                </div>
-               </div>
+                                <div class="row">
+                                    <span class="label">Status -</span>
+                                    <span class="value">#{{ $deliveryOrder->status }}</span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="row">
+                                    <span class="label">Nama toko -</span>
+                                    <span class="value">#{{ $deliveryOrder->store_name }}</span>
+                                </div>
+
+                                <div class="row">
+                                    <span class="label">{{ __('admin::app.sales.invoices.date') }} -</span>
+                                    <span class="value">{{ core()->formatDate($deliveryOrder->created_at, 'd-m-Y') }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="table items">

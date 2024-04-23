@@ -50,8 +50,7 @@ class Cart
         protected TaxCategoryRepository $taxCategoryRepository,
         protected WishlistRepository $wishlistRepository,
         protected CustomerAddressRepository $customerAddressRepository
-    )
-    {
+    ) {
         $this->initCart();
     }
 
@@ -76,10 +75,6 @@ class Cart
      */
     public function getCart(): ?\Webkul\Checkout\Contracts\Cart
     {
-        if ($this->cart) {
-            return $this->cart;
-        }
-
         if (auth()->guard()->check()) {
             $this->cart = $this->cartRepository->findOneWhere([
                 'customer_id' => auth()->guard()->user()->id,
@@ -126,7 +121,7 @@ class Cart
 
         foreach ($items as $item) {
             if ($item->product->getTypeInstance()->compareOptions($item->additional, $data['additional'])) {
-                if (! isset($data['additional']['parent_id'])) {
+                if (!isset($data['additional']['parent_id'])) {
                     return $item;
                 }
 
@@ -152,15 +147,15 @@ class Cart
         $cart = $this->getCart();
 
         if (
-            ! $cart
-            && ! $cart = $this->create($data)
+            !$cart
+            && !$cart = $this->create($data)
         ) {
             return ['warning' => __('shop::app.checkout.cart.item.error-add')];
         }
 
         $product = $this->productRepository->find($productId);
 
-        if (! $product->status) {
+        if (!$product->status) {
             return ['info' => __('shop::app.checkout.cart.item.inactive-add')];
         }
 
@@ -184,7 +179,7 @@ class Cart
                     $cartProduct['parent_id'] = $parentCartItem->id;
                 }
 
-                if (! $cartItem) {
+                if (!$cartItem) {
                     $cartItem = $this->cartItemRepository->create(array_merge($cartProduct, ['cart_id' => $cart->id]));
                 } else {
                     if (
@@ -199,7 +194,7 @@ class Cart
                     }
                 }
 
-                if (! $parentCartItem) {
+                if (!$parentCartItem) {
                     $parentCartItem = $cartItem;
                 }
             }
@@ -248,7 +243,7 @@ class Cart
 
         $cart = $this->cartRepository->create($cartData);
 
-        if (! $cart) {
+        if (!$cart) {
             session()->flash('error', __('shop::app.checkout.cart.create-error'));
 
             return;
@@ -272,13 +267,13 @@ class Cart
         foreach ($data['qty'] as $itemId => $quantity) {
             $item = $this->cartItemRepository->find($itemId);
 
-            if (! $item) {
+            if (!$item) {
                 continue;
             }
 
             if (
                 $item->product
-                && ! $item->product->status
+                && !$item->product->status
             ) {
                 throw new Exception(__('shop::app.checkout.cart.item.inactive'));
             }
@@ -291,7 +286,7 @@ class Cart
 
             $item->quantity = $quantity;
 
-            if (! $this->isItemHaveQuantity($item)) {
+            if (!$this->isItemHaveQuantity($item)) {
                 throw new Exception(__('shop::app.checkout.cart.quantity.inventory_warning'));
             }
 
@@ -323,14 +318,14 @@ class Cart
     {
         Event::dispatch('checkout.cart.delete.before', $itemId);
 
-        if (! $cart = $this->getCart()) {
+        if (!$cart = $this->getCart()) {
             return false;
         }
 
         if ($cartItem = $cart->items()->find($itemId)) {
             $cartItem->delete();
 
-            if (! $cart->items()->get()->count()) {
+            if (!$cart->items()->get()->count()) {
                 $this->removeCart($cart);
             } else {
                 Shipping::collectRates();
@@ -357,7 +352,7 @@ class Cart
 
         Event::dispatch('checkout.cart.delete.all.before', $cart);
 
-        if (! $cart) {
+        if (!$cart) {
             return $cart;
         }
 
@@ -383,7 +378,7 @@ class Cart
             if ($this->isCartItemInactive($item)) {
                 $this->cartItemRepository->delete($item->id);
 
-                if (! $cart->items->count()) {
+                if (!$cart->items->count()) {
                     $this->removeCart($cart);
                 }
 
@@ -401,7 +396,7 @@ class Cart
      */
     public function saveCustomerAddress($data): bool
     {
-        if (! $cart = $this->getCart()) {
+        if (!$cart = $this->getCart()) {
             return false;
         }
 
@@ -446,11 +441,11 @@ class Cart
      */
     public function saveShippingMethod($shippingMethodCode): bool
     {
-        if (! $cart = $this->getCart()) {
+        if (!$cart = $this->getCart()) {
             return false;
         }
 
-        if (! Shipping::isMethodCodeExists($shippingMethodCode)) {
+        if (!Shipping::isMethodCodeExists($shippingMethodCode)) {
             return false;
         }
 
@@ -468,7 +463,7 @@ class Cart
      */
     public function savePaymentMethod($payment)
     {
-        if (! $cart = $this->getCart()) {
+        if (!$cart = $this->getCart()) {
             return false;
         }
 
@@ -479,12 +474,10 @@ class Cart
         $cartPayment = new CartPayment;
 
         $cartPayment->method = $payment['method'];
-        if ($payment['method'] == 'moneytransfer') {
-            $jsonAdditional = '{"bank":"BCA","bank_name":"Merry Lukito","bank_no":"4620499299"}';
-            $jsonArray = json_encode($jsonAdditional);
+        $jsonAdditional = '{"bank":"BCA","bank_name":"Merry Lukito","bank_no":"4620499299"}';
+        $jsonArray = json_encode($jsonAdditional);
 
-            $cartPayment->additional = $jsonArray;
-        }
+        $cartPayment->additional = $jsonArray;
         $cartPayment->cart_id = $cart->id;
         $cartPayment->save();
 
@@ -498,11 +491,11 @@ class Cart
      */
     public function collectTotals(): void
     {
-        if (! $this->validateItems()) {
+        if (!$this->validateItems()) {
             return;
         }
 
-        if (! $cart = $this->getCart()) {
+        if (!$cart = $this->getCart()) {
             return;
         }
 
@@ -570,7 +563,7 @@ class Cart
      */
     public function calculateItemsTax(): void
     {
-        if (! $cart = $this->getCart()) {
+        if (!$cart = $this->getCart()) {
             return;
         }
 
@@ -579,7 +572,7 @@ class Cart
         foreach ($cart->items as $item) {
             $taxCategory = $this->taxCategoryRepository->find($item->product->tax_category_id);
 
-            if (! $taxCategory) {
+            if (!$taxCategory) {
                 continue;
             }
 
@@ -621,13 +614,13 @@ class Cart
      */
     public function validateItems(): bool
     {
-        if (! $cart = $this->getCart()) {
+        if (!$cart = $this->getCart()) {
             return false;
         }
 
         $cartItems = $cart->items()->get();
 
-        if (! count($cartItems)) {
+        if (!count($cartItems)) {
             $this->removeCart($cart);
 
             return false;
@@ -645,7 +638,7 @@ class Cart
 
                 session()->flash('info', __('shop::app.checkout.cart.item.inactive'));
             } else {
-                $price = ! is_null($item->custom_price) ? $item->custom_price : $item->base_price;
+                $price = !is_null($item->custom_price) ? $item->custom_price : $item->base_price;
 
                 $this->cartItemRepository->update([
                     'price'      => core()->convertPrice($price),
@@ -658,7 +651,7 @@ class Cart
             $isInvalid |= $validationResult->isCartInvalid();
         }
 
-        return ! $isInvalid;
+        return !$isInvalid;
     }
 
     /**

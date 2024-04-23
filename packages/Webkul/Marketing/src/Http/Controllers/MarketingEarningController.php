@@ -58,11 +58,13 @@ class MarketingEarningController extends Controller
                 'point_histories.status'
             ])->join('marketing_reseller', 'orders.customer_id', 'marketing_reseller.customer_id')
             ->join('customers', 'orders.customer_id', 'customers.id')
-            ->join('point_histories', 'orders.id', 'point_histories.id')
+            ->leftJoin('point_histories', 'orders.id', 'point_histories.id')
             ->where('marketing_reseller.marketing_id', $marketingId)
             ->get();
 
-            $sales = MarketingReseller::join('customers', 'marketing_reseller.customer_id', 'customers.id')->join('customer_groups', 'customers.customer_group_id', 'customer_groups.id')->where('marketing_reseller.marketing_id', $marketingId)->get();
+            $sales = MarketingReseller::join('customers', 'marketing_reseller.customer_id', 'customers.id')
+                ->join('customer_groups', 'customers.customer_group_id', 'customer_groups.id')
+                ->where('marketing_reseller.marketing_id', $marketingId)->get();
 
             return view($this->_config['view'], [
                 'orders' => $orders,
