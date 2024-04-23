@@ -273,7 +273,7 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
     }
 
     /**
-     * Get all marketing of a customer.
+     * Get all marketing reseller of a customer.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

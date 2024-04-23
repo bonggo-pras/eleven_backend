@@ -5,10 +5,12 @@ namespace Webkul\Product\Type;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Webkul\Checkout\Models\CartItem as CartItemModel;
+use Webkul\Customer\Models\CustomerGroup;
 use Webkul\Product\Datatypes\CartItemValidationResult;
 use Webkul\Product\Facades\ProductImage;
 use Webkul\Product\Models\Product;
 use Webkul\Product\Models\ProductAttributeValue;
+use Webkul\Product\Models\ProductCustomerGroupPrice;
 use Webkul\Product\Models\ProductFlat;
 use Webkul\Product\Repositories\ProductCustomerGroupPriceRepository;
 
@@ -160,6 +162,7 @@ class Configurable extends AbstractType
 
         $this->updateDefaultVariantId();
 
+        $customerGroupId = CustomerGroup::where('code', 'wholesale')->first();
         $route = request()->route() ? request()->route()->getName() : '';
         if ($route != 'admin.catalog.products.massupdate') {
             $previousVariantIds = $product->variants->pluck('id');
@@ -183,6 +186,30 @@ class Configurable extends AbstractType
                         $variantData['locale'] = $data['locale'];
 
                         $this->updateVariant($variantData, $variantId);
+
+                        $dataCustomerGroupPrice = [
+                            'qty' => 1,
+                            'value_type' => 'fixed',
+                            'value' => $variantData['pricebigreseller'] ?? $variantData['price'],
+                            'product_id' => $variantId,
+                            'customer_group_id' => $customerGroupId->id ?? 0
+                        ];
+
+                        if ($dataCustomerGroupPrice) {
+
+                            $isAlreadyExist = ProductCustomerGroupPrice::select('id')->where([
+                                'product_id' => $dataCustomerGroupPrice['product_id'],
+                                'customer_group_id' => $customerGroupId->id
+                            ])->first();
+
+                            if ($isAlreadyExist == null) {
+                                ProductCustomerGroupPrice::create(array_merge([
+                                    'product_id' => $dataCustomerGroupPrice['product_id'],
+                                ], $dataCustomerGroupPrice));
+                            } else {
+                                $isAlreadyExist->update($dataCustomerGroupPrice);
+                            }
+                        };
                     }
                 }
             }
@@ -208,7 +235,7 @@ class Configurable extends AbstractType
      */
     public function createVariant($product, $permutation, $data = [])
     {
-        if (! count($data)) {
+        if (!count($data)) {
             $data = [
                 'sku'         => $product->sku . '-variant-' . implode('-', $permutation),
                 'name'        => '',
@@ -226,7 +253,7 @@ class Configurable extends AbstractType
 
         if (
             isset($productInstance->variantsType)
-            && ! in_array($productInstance->variantsType, ['bundle', 'configurable', 'grouped'])
+            && !in_array($productInstance->variantsType, ['bundle', 'configurable', 'grouped'])
         ) {
             $typeOfVariants = $productInstance->variantsType;
         }
@@ -241,7 +268,7 @@ class Configurable extends AbstractType
         $attributeValues = [];
 
         foreach ($this->fillableTypes as $attributeCode) {
-            if (! isset($data[$attributeCode])) {
+            if (!isset($data[$attributeCode])) {
                 continue;
             }
 
@@ -340,7 +367,7 @@ class Configurable extends AbstractType
         $variant->update(['sku' => $data['sku']]);
 
         foreach ($this->fillableTypes as $attributeCode) {
-            if (! isset($data[$attributeCode])) {
+            if (!isset($data[$attributeCode])) {
                 continue;
             }
 
@@ -374,7 +401,7 @@ class Configurable extends AbstractType
 
             $columnName = ProductAttributeValue::$attributeTypeFields[$attribute->type];
 
-            if (! $productAttributeValue) {
+            if (!$productAttributeValue) {
                 $this->attributeValueRepository->create([
                     'product_id'   => $variant->id,
                     'attribute_id' => $attribute->id,
@@ -429,7 +456,7 @@ class Configurable extends AbstractType
             $matchCount = 0;
 
             foreach ($superAttributeCodes as $attributeCode) {
-                if (! isset($data[$attributeCode])) {
+                if (!isset($data[$attributeCode])) {
                     return false;
                 }
 
@@ -643,17 +670,17 @@ class Configurable extends AbstractType
     {
         if ($this->haveSpecialPrice()) {
             return '<div class="sticker sale">' . trans('shop::app.products.sale') . '</div>'
-            . '<span class="price-label">' . trans('shop::app.products.price-label') . '</span>'
-            . '<span class="special-price">' . core()->currency($this->evaluatePrice($this->getMinimalPrice())) . '</span>'.'<span class="regular-price"></span>';
+                . '<span class="price-label">' . trans('shop::app.products.price-label') . '</span>'
+                . '<span class="special-price">' . core()->currency($this->evaluatePrice($this->getMinimalPrice())) . '</span>' . '<span class="regular-price"></span>';
         } elseif ($this->haveOffer()) {
             return '<div class="sticker sale">' . trans('shop::app.products.sale') . '</div>'
-            . '<span class="price-label">' . trans('shop::app.products.price-label') . '</span>'
-            . '<span class="regular-price">' . core()->currency($this->evaluatePrice($this->getMinimalPrice())) . '</span>'
-            . '<span class="final-price">' . core()->currency($this->evaluatePrice($this->getOfferPrice())) . '</span>';
+                . '<span class="price-label">' . trans('shop::app.products.price-label') . '</span>'
+                . '<span class="regular-price">' . core()->currency($this->evaluatePrice($this->getMinimalPrice())) . '</span>'
+                . '<span class="final-price">' . core()->currency($this->evaluatePrice($this->getOfferPrice())) . '</span>';
         } else {
             return '<span class="price-label">' . trans('shop::app.products.price-label') . '</span>'
-            . ' '
-            . '<span class="special-price">' . core()->currency($this->evaluatePrice($this->getMinimalPrice())) . '</span> <span class="regular-price"></span>';
+                . ' '
+                . '<span class="special-price">' . core()->currency($this->evaluatePrice($this->getMinimalPrice())) . '</span> <span class="regular-price"></span>';
         }
     }
 
@@ -687,10 +714,10 @@ class Configurable extends AbstractType
     public function prepareForCart($data)
     {
         $data['quantity'] = parent::handleQuantity((int) $data['quantity']);
-        
+
         if (
-            ! isset($data['selected_configurable_option'])
-            || ! $data['selected_configurable_option']
+            !isset($data['selected_configurable_option'])
+            || !$data['selected_configurable_option']
         ) {
             if ($this->getDefaultVariantId()) {
                 $data['selected_configurable_option'] = $this->getDefaultVariantId();
@@ -703,7 +730,7 @@ class Configurable extends AbstractType
 
         $childProduct = $this->productRepository->find($data['selected_configurable_option']);
 
-        if (! $childProduct->haveSufficientQuantity($data['quantity'])) {
+        if (!$childProduct->haveSufficientQuantity($data['quantity'])) {
             return trans('shop::app.checkout.cart.quantity.inventory_warning');
         }
 
@@ -758,11 +785,11 @@ class Configurable extends AbstractType
             return $options1['selected_configurable_option'] === $options2['selected_configurable_option'];
         }
 
-        if (! isset($options1['selected_configurable_option'])) {
+        if (!isset($options1['selected_configurable_option'])) {
             return false;
         }
 
-        if (! isset($options2['selected_configurable_option'])) {
+        if (!isset($options2['selected_configurable_option'])) {
             return false;
         }
     }
@@ -945,19 +972,20 @@ class Configurable extends AbstractType
         return $total;
     }
 
-    public function autoInsertCustomerGroupPrice($data) {
+    public function autoInsertCustomerGroupPrice($data)
+    {
         foreach ($data['variants'] as $variantId => $variantData) {
             $priceBigReseller = $variantData['pricebigreseller'];
 
             if ($priceBigReseller) {
                 $data['customer_group_prices'] = [
                     $variantId => [
-                     'customer_group_id' => 3,
-                     "qty" => 1,
-                     "value_type" => "fixed",
-                     "value" => $priceBigReseller,
+                        'customer_group_id' => 3,
+                        "qty" => 1,
+                        "value_type" => "fixed",
+                        "value" => $priceBigReseller,
                     ]
-                 ];
+                ];
             }
         }
 

@@ -31,14 +31,14 @@ class MarketingEarningDataGrid extends DataGrid
         $queryBuilder = DB::table('marketing_reseller')
             ->select([
                 'marketing_reseller.id as id',
-                DB::raw('CONCAT(' . DB::getTablePrefix() . 'customers.first_name, " ", ' . DB::getTablePrefix() . 'customers.last_name) as full_name'),
+                DB::raw('CONCAT(' . DB::getTablePrefix() . 'cust_marketing.first_name, " ", ' . DB::getTablePrefix() . 'cust_marketing.last_name) as full_name'),
                 'marketing_reseller.marketing_id',
                 'marketing_reseller.customer_id',
-                DB::raw('COUNT(DISTINCT orders.customer_id = 1) as total_reseller'),
                 DB::raw('SUM(orders.total_qty_ordered) as total_qty'),
                 DB::raw('SUM(orders.base_grand_total) as grand_total'),
                 'orders.created_at as order_date',
             ])
+            ->join('customers as cust_marketing', 'marketing_reseller.marketing_id', 'cust_marketing.id')
             ->join('customers', 'marketing_reseller.customer_id', 'customers.id')
             ->join('orders', 'customers.id', 'orders.customer_id')
             ->groupBy('marketing_reseller.marketing_id')
@@ -69,15 +69,6 @@ class MarketingEarningDataGrid extends DataGrid
             'index'      => 'full_name',
             'label'      => 'Nama Lengkap',
             'type'       => 'string',
-            'searchable' => false,
-            'sortable'   => false,
-            'filterable' => false,
-        ]);
-
-        $this->addColumn([
-            'index'      => 'total_reseller',
-            'label'      => 'Total Reseller',
-            'type'       => 'number',
             'searchable' => false,
             'sortable'   => false,
             'filterable' => false,

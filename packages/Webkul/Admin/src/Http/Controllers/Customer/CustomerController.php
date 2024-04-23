@@ -2,6 +2,7 @@
 
 namespace Webkul\Admin\Http\Controllers\Customer;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Webkul\Admin\DataGrids\CustomerDataGrid;
@@ -113,7 +114,17 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        $customer = $this->customerRepository->findOrFail($id);
+        $customer = $this->customerRepository
+        ->addSelect(
+            'customers.*',
+            'cus_marketing.referral_code as marketing_code',
+            'marketing_reseller.id as marketingId',
+        )
+        ->join('marketing_reseller', 'customers.id', '=', 'marketing_reseller.customer_id')
+        ->join('customers as cus_marketing', 'marketing_reseller.marketing_id', '=', 'cus_marketing.id')
+        ->addSelect(
+            DB::raw('CONCAT(' . DB::getTablePrefix() . 'cus_marketing.first_name, " ", ' . DB::getTablePrefix() . 'cus_marketing.last_name) as cus_marketing_full_name')
+        )->first();
 
         $groups = $this->customerGroupRepository->findWhere([['code', '<>', 'guest']]);
 
