@@ -3,6 +3,7 @@
 namespace Webkul\DeliveryOrder\Http\Controllers\Admin;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -54,6 +55,14 @@ class DeliveryOrderController extends Controller
         return view($this->_config['view']);
     }
 
+    public function indexCustom()
+    {
+        $datas = DB::table('delivery_orders')
+            ->select('delivery_orders.id', 'delivery_orders.name', 'delivery_orders.store_name', 'delivery_orders.keterangan', 'delivery_orders.status', 'delivery_orders.end', 'delivery_orders.created_at', 'delivery_orders.updated_at')
+            ->get();
+
+        return view($this->_config['view'], ['datas' => $datas]);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -279,9 +288,16 @@ class DeliveryOrderController extends Controller
         $deliveryOrder = DeliveryOrder::find($id);
         $deliveryOrder->items()->delete();
 
-        $deliveryOrder->delete();
-        session()->flash('success', 'Berhasil menghapus surat jalan');
 
-        return redirect()->route($this->_config['redirect']);
+        if ($deliveryOrder->delete()) {
+            return response()->json(['err' => false]);
+        } else {
+            return response()->json(['err' => true]);
+        }
+
+        // session()->flash('success', 'Berhasil menghapus surat jalan');
+
+        // return redirect()->route($this->_config['redirect']);
+        // var_dump('test', $id);
     }
 }
