@@ -57,11 +57,75 @@ class DeliveryOrderController extends Controller
 
     public function indexCustom()
     {
-        $datas = DB::table('delivery_orders')
-            ->select('delivery_orders.id', 'delivery_orders.name', 'delivery_orders.store_name', 'delivery_orders.keterangan', 'delivery_orders.status', 'delivery_orders.end', 'delivery_orders.created_at', 'delivery_orders.updated_at')
+        $datas = DB::table('delivery_order_items as doi')
+            ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
+            ->join('product_categories as pc', 'pc.product_id', '=', 'doi.product_id')
+            ->join('category_translations as ct', 'ct.category_id', '=', 'pc.category_id')
+            ->join('products as p', 'p.id', '=', 'pc.product_id')
+            ->select(
+                'do.id',
+                'do.store_name',
+                'doi.id as delivery_order_items_id',
+                'p.sku as nama_product',
+                DB::raw('SUM(doi.stock) as jumlah_stok'),
+                'ct.name as nama_kategori',
+                'do.name',
+                'do.end'
+            )
+            ->groupBy('ct.category_id', 'do.id', 'p.id', 'do.name', 'do.end')
             ->get();
 
         return view($this->_config['view'], ['datas' => $datas]);
+    }
+
+    public function filter(Request $request)
+    {
+        // var_dump($request->all(), $request->kategori_barang);
+        // exit;
+        // var_dump($request->name);
+        $datas = DB::table('delivery_order_items as doi')
+            ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
+            ->join('product_categories as pc', 'pc.product_id', '=', 'doi.product_id')
+            ->join('category_translations as ct', 'ct.category_id', '=', 'pc.category_id')
+            ->join('products as p', 'p.id', '=', 'pc.product_id')
+            ->select(
+                'do.id',
+                'do.store_name',
+                'doi.id as delivery_order_items_id',
+                'p.sku as nama_product',
+                DB::raw('SUM(doi.stock) as jumlah_stok'),
+                'ct.name as nama_kategori',
+                'do.name',
+                'do.end'
+            );
+
+        if ($request->name != '') {
+            $datas = $datas->where('p.sku', 'like', "%{$request->name}%");
+        }
+
+        if ($request->store_name_barang != '') {
+            $datas = $datas->where('do.store_name', 'like', "%{$request->store_name_barang}%");
+        }
+
+        if ($request->kategori_barang != '') {
+            $datas = $datas->where('ct.category_id', '=', "{$request->kategori_barang}");
+        }
+
+        if ($request->tgl_awal != '') {
+            $datas = $datas->whereDate('do.end', '>=', "{$request->tgl_awal}");
+        }
+
+        if ($request->tgl_akhir != '') {
+            $datas = $datas->whereDate('do.end', '<=', "{$request->tgl_akhir}");
+        }
+        $datas = $datas->groupBy('ct.category_id', 'do.id', 'p.id', 'do.name', 'do.end');
+        $datas = $datas->get();
+        if (count($datas) > 0) {
+            return response()->json(['err' => false, 'datas' => $datas]);
+        } else {
+            return response()->json(['err' => true, 'datas' => 'Data Kosong']);
+        }
+        // return $datas;
     }
     /**
      * Show the form for creating a new resource.
@@ -294,10 +358,5 @@ class DeliveryOrderController extends Controller
         } else {
             return response()->json(['err' => true]);
         }
-
-        // session()->flash('success', 'Berhasil menghapus surat jalan');
-
-        // return redirect()->route($this->_config['redirect']);
-        // var_dump('test', $id);
     }
 }

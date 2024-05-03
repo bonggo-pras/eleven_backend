@@ -14,6 +14,8 @@ Route::group([
     // ])->name('admin.deliveryorder.index');
 
 
+    Route::post('/filter', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@filter')->name('admin.deliveryorder.filter');
+
     Route::get('/create', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@create')->defaults('_config', [
         'view' => 'deliveryorder::admin.create',
     ])->name('admin.deliveryorder.create');
