@@ -23,7 +23,7 @@ Delivery Orders
     <div class="page-content">
         {{-- <button @click="showModal('deliveryFilterModal')" class="btn btn-lg"
             style="background-color:#ffc107;">Filter</button> --}}
-        <button id="btn-filter" class="btn btn-md" style="background-color:#ffc107;">Filter</button>
+        {{-- <button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107;">Filter</button> <br> --}}
         <table class="table-data-delivery-order" id="table-data-delivery-order">
             <thead>
                 <tr style=" height: 65px;">
@@ -32,7 +32,7 @@ Delivery Orders
                     <th>Kategori Barang</th>
                     <th>Barang</th>
                     <th>Stok</th>
-                    <th>Nama</th>
+                    <th>Nama DO </th>
                     <th>Store Nama Barang</th>
                     <th>Tanggal Keluar</th>
                     <th>Actions</th>
@@ -70,7 +70,7 @@ Delivery Orders
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Modal title</h5>
+                <h5 class="modal-title">Filter</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -80,9 +80,14 @@ Delivery Orders
                     @csrf
                     <table width="100%">
                         <tr>
-                            <td> <label for="name" style="font-weight: bold;">Nama</label></td>
+                            <td> <label for="name" style="font-weight: bold;">Nama Barang</label></td>
                             <td>:</td>
                             <td><input id="name" style="width:100%;" name="name"></td>
+                        </tr>
+                        <tr>
+                            <td> <label for="name_do" style="font-weight: bold;">Nama DO</label></td>
+                            <td>:</td>
+                            <td><input id="name_do" style="width:100%;" name="name_do"></td>
                         </tr>
                         <tr>
                             <td> <label for="store_name_barang" style="font-weight: bold;">Store Nama Barang</label>
@@ -143,6 +148,8 @@ Delivery Orders
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
 </script>
 <script src="https://cdn.datatables.net/2.0.5/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script></script>
 <script>
@@ -165,10 +172,20 @@ Delivery Orders
             }
          });
 
-        $('#table-data-delivery-order').DataTable();
-         $('#btn-filter').click(function(){
+        $('#table-data-delivery-order').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'print'
+            ]
+        });
+
+        $('<button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107; margin-right: 20px;">Filter</button>').insertBefore('.buttons-print');
+        $('<br><br>').insertAfter('.buttons-print');
+        $('.buttons-print').addClass('btn btn-sm btn-primary');
+
+        $('#btn-filter').click(function(){
             $('#deliveryFilterModal').modal('show');
-         });
+        });
 
         $('#deliveryFilterForm').submit(function(e){
             e.preventDefault();
@@ -211,7 +228,18 @@ Delivery Orders
 
                             $('#table-data-delivery-order').DataTable().destroy();
                             $('#table-data-delivery-order tbody').html(tr);
-                            $('#table-data-delivery-order').DataTable();
+                            $('#table-data-delivery-order').DataTable({
+                                dom: 'Bfrtip',
+                                buttons: [
+                                    'print'
+                                ]
+                            });
+                            $('<button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107; margin-right: 20px;">Filter</button>').insertBefore('.buttons-print');
+                            $('<br><br>').insertAfter('.buttons-print');
+                            $('.buttons-print').addClass('btn btn-sm btn-primary');
+                            $('#btn-filter').click(function(){
+                                $('#deliveryFilterModal').modal('show');
+                            });
 
                             $('#btn-filter-modal').html('Filter');
                             $('#deliveryFilterModal').modal('hide');

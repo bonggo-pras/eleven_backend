@@ -102,7 +102,9 @@ class DeliveryOrderController extends Controller
         if ($request->name != '') {
             $datas = $datas->where('p.sku', 'like', "%{$request->name}%");
         }
-
+        if ($request->name_do != '') {
+            $datas = $datas->where('do.name', 'like', "%{$request->name_do}%");
+        }
         if ($request->store_name_barang != '') {
             $datas = $datas->where('do.store_name', 'like', "%{$request->store_name_barang}%");
         }
