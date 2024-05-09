@@ -9,12 +9,11 @@ Route::group([
         'view' => 'deliveryorder::admin.index-custom',
     ])->name('admin.deliveryorder.index');
 
-    // Route::get('', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@index')->defaults('_config', [
-    //     'view' => 'deliveryorder::admin.index',
-    // ])->name('admin.deliveryorder.index');
+    Route::get('/cetak-do', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@cetakDo')->defaults('_config', [
+        'view' => 'deliveryorder::admin.cetak-do',
+    ])->name('admin.deliveryorder.cetak-do');
 
-
-    Route::post('/filter', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@filter')->name('admin.deliveryorder.filter');
+    Route::post('/index-json', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@indexJson')->name('admin.deliveryorder.indexJson');
 
     Route::get('/create', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@create')->defaults('_config', [
         'view' => 'deliveryorder::admin.create',

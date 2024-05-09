@@ -17,6 +17,8 @@ use Webkul\Product\Models\Product;
 use Webkul\Core\Traits\PDFHandler;
 use Webkul\Product\Models\ProductInventory;
 use Webkul\Sales\Repositories\ShipmentItemRepository;
+// use DataTables;
+use Yajra\DataTables\Facades\DataTables;
 
 class DeliveryOrderController extends Controller
 {
@@ -77,12 +79,8 @@ class DeliveryOrderController extends Controller
 
         return view($this->_config['view'], ['datas' => $datas]);
     }
-
-    public function filter(Request $request)
+    public function indexJson(Request $request)
     {
-        // var_dump($request->all(), $request->kategori_barang);
-        // exit;
-        // var_dump($request->name);
         $datas = DB::table('delivery_order_items as doi')
             ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
             ->join('product_categories as pc', 'pc.product_id', '=', 'doi.product_id')
@@ -98,6 +96,7 @@ class DeliveryOrderController extends Controller
                 'do.name',
                 'do.end'
             );
+
 
         if ($request->name != '') {
             $datas = $datas->where('p.sku', 'like', "%{$request->name}%");
@@ -120,15 +119,22 @@ class DeliveryOrderController extends Controller
         if ($request->tgl_akhir != '') {
             $datas = $datas->whereDate('do.end', '<=', "{$request->tgl_akhir}");
         }
-        $datas = $datas->groupBy('ct.category_id', 'do.id', 'p.id', 'do.name', 'do.end');
-        $datas = $datas->get();
-        if (count($datas) > 0) {
-            return response()->json(['err' => false, 'datas' => $datas]);
-        } else {
-            return response()->json(['err' => true, 'datas' => 'Data Kosong']);
-        }
-        // return $datas;
+        $datas = $datas->groupBy('ct.category_id', 'do.id', 'p.id', 'do.name', 'do.end')->get();
+
+        return DataTables::of($datas)->addIndexColumn()->addColumn('action', function ($row) {
+            $button =  '<div class="action">';
+            $button .= "<a href='/admin/deliveryorder/edit/$row->id'><span
+                 class='icon pencil-lg-icon'></span></a>
+                 <a href='/admin/deliveryorder/view/$row->id) }}'><span
+                 class='icon eye-icon'></span></a>
+                 <a href='javascript::void(0)' class='item-del' data-id='$row->id'><span
+                 class='icon trash-icon'></span></a>
+                ";
+            $button .= '</div>';
+            return $button;
+        })->make();
     }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -220,14 +226,15 @@ class DeliveryOrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\View\View
      */
-    public function print($id)
+    public function cetakDo($id)
     {
-        $deliveryOrder = DeliveryOrder::with(['items', 'items.productFlat'])->where('id', $id)->first();
+        // $deliveryOrder = DeliveryOrder::with(['items', 'items.productFlat'])->where('id', $id)->first();
 
-        return $this->downloadPDF(
-            view($this->_config['view'], compact('deliveryOrder'))->render(),
-            'delivery-order-' . $deliveryOrder->created_at->format('d-m-Y')
-        );
+        // return $this->downloadPDF(
+        //     view($this->_config['view'], compact('deliveryOrder'))->render(),
+        //     'delivery-order-' . $deliveryOrder->created_at->format('d-m-Y')
+        // );
+        return view($this->_config['view']);
     }
 
     /**

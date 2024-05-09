@@ -7,11 +7,7 @@ Delivery Orders
 @section('content')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-{{--
-<link href="//cdn.datatables.net/2.0.5/css/dataTables.dataTables.min.css" rel="stylesheet" type="text/css"> --}}
-<link href="https://cdn.datatables.net/2.0.7/css/dataTables.dataTables.min.css" rel="stylesheet" type="text/css">
-
-
+<link href="//cdn.datatables.net/2.0.5/css/dataTables.dataTables.min.css" rel="stylesheet" type="text/css">
 <div class="content">
     <div class="page-header">
         <div class="page-title">
@@ -25,7 +21,9 @@ Delivery Orders
     </div>
 
     <div class="page-content">
-
+        {{-- <button @click="showModal('deliveryFilterModal')" class="btn btn-lg"
+            style="background-color:#ffc107;">Filter</button> --}}
+        {{-- <button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107;">Filter</button> <br> --}}
         <table class="table-data-delivery-order" id="table-data-delivery-order">
             <thead>
                 <tr style=" height: 65px;">
@@ -41,6 +39,27 @@ Delivery Orders
                 </tr>
             </thead>
             <tbody>
+                @foreach ($datas as $key => $row)
+                <tr>
+                    <td>{{++$key}}</td>
+                    <td>{{$row->nama_kategori}}</td>
+                    <td>{{$row->nama_product}}</td>
+                    <td>{{$row->jumlah_stok}}</td>
+                    <td>{{$row->name}}</td>
+                    <td>{{$row->store_name}}</td>
+                    <td>{{$row->end}}</td>
+                    <td class="actions" style="white-space: nowrap; width: 100px;">
+                        <div class="action">
+                            <a href="{{ route('admin.deliveryorder.edit', $row->id) }}"><span
+                                    class="icon pencil-lg-icon"></span></a>
+                            <a href="{{ route('admin.deliveryorder.view', $row->id) }}" target="_blank"><span
+                                    class="icon eye-icon"></span></a>
+                            <a href="javascript:void(0)" class="item-del" data-id="{{$row->id}}"><span
+                                    class="icon trash-icon"></span></a>
+                        </div>
+                    </td>
+                </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
@@ -128,8 +147,7 @@ Delivery Orders
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
 </script>
-{{-- <script src="https://cdn.datatables.net/2.0.5/js/dataTables.js"></script> --}}
-<script src="https://cdn.datatables.net/2.0.7/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.5/js/dataTables.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -153,44 +171,12 @@ Delivery Orders
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
          });
-        //  $.ajax({
-        //     url: "{{route('admin.deliveryorder.indexJson')}}",
-        //     method: "POST",
-        //     success: function(ev) {
-        //          console.log(ev)
-        //     }
-        // });
-        // $('#table-data-delivery-order').DataTable({
-        //     "ajax": {
-        //         "url": "{{route('admin.deliveryorder.indexJson')}}",
-        //         "type": "GET"
-        //     }
-        // });
 
-        var table = $('#table-data-delivery-order').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{route('admin.deliveryorder.indexJson')}}",
-                type: "POST",
-            },
-            columns: [
-                    {data: 'DT_RowIndex', name: 'DT_RowIndex'},
-                    {data: 'nama_kategori', name: 'nama_kategori'},
-                    {data: 'nama_product', name: 'nama_product'},
-                    {data: 'jumlah_stok', name: 'jumlah_stok'},
-                    {data: 'name', name: 'name'},
-                    {data: 'store_name', name: 'store_name'},
-                    {data: 'end', name: 'end'},
-                    {data:'action',name:'action'}
-                ],
+        $('#table-data-delivery-order').DataTable({
             dom: 'Bfrtip',
-            buttons: [{
-                extend: 'print',
-                oSelectorOpts: {
-                    page: 'all'
-                },
-            }]
+            buttons: [
+                'print'
+            ]
         });
 
         $('<button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107; margin-right: 20px;">Filter</button>').insertBefore('.buttons-print');
@@ -203,80 +189,88 @@ Delivery Orders
 
         $('#deliveryFilterForm').submit(function(e){
             e.preventDefault();
-            let ini = $(this);
 
-            $('#table-data-delivery-order').DataTable().destroy();
-
-            async function load(){
-                await  $('#table-data-delivery-order').DataTable({
-                    processing: true,
-                    cache:false,
-                    serverSide: true,
-                    ajax: {
-                        url: "{{route('admin.deliveryorder.indexJson')}}",
-                        type: "POST",
-                        data: {
-                            'name': $('#name').val(),
-                            'name_do': $('#name_do').val(),
-                            'store_name_barang': $('#store_name_barang').val(),
-                            'tgl_awal': $('#tgl_awal').val(),
-                            'tgl_akhir': $('#tgl_akhir').val(),
-                        }
+            // delete $.ajaxSettings.headers["X-CSRF-TOKEN'"];
+            $.ajax({
+                    url: "{{route('admin.deliveryorder.filter')}}",
+                    method: "POST",
+                    data:$(this).serialize(),
+                    beforeSend:function(){
+                        $('#btn-filter-modal').html('load...');
                     },
-                    columns: [
-                            {data: 'DT_RowIndex', name: 'DT_RowIndex'},
-                            {data: 'nama_kategori', name: 'nama_kategori'},
-                            {data: 'nama_product', name: 'nama_product'},
-                            {data: 'jumlah_stok', name: 'jumlah_stok'},
-                            {data: 'name', name: 'name'},
-                            {data: 'store_name', name: 'store_name'},
-                            {data: 'end', name: 'end'},
-                            {data:'action',name:'action'}
-                    ],
-                    dom: 'Bfrtip',
-                    buttons: [{
-                        extend: 'print',
-                        oSelectorOpts: {
-                            page: 'all'
-                        },
-                    }]
-                });
-            }
+                    success:function(ev){
 
-            $('#btn-filter-modal').html('load...');
+                        if(!ev.err){
 
-            load().then(function(){
-                $('<button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107; margin-right: 20px;">Filter</button>').insertBefore('.buttons-print');
-                $('<br><br>').insertAfter('.buttons-print');
-                $('.buttons-print').addClass('btn btn-sm btn-primary');
-                $('#btn-filter').click(function(){
-                    $('#deliveryFilterModal').modal('show');
-                });
+                            let tr = '';
+                            $no = 1;
+                            for (const key in  ev.datas) {
+                            tr += `<tr>
+                                <td>${$no++}</td>
+                                    <td>${ev.datas[key].nama_kategori}</td>
+                                    <td>${ev.datas[key].nama_product}</td>
+                                    <td>${ev.datas[key].jumlah_stok}</td>
+                                    <td>${ev.datas[key].name}</td>
+                                    <td>${ev.datas[key].store_name}</td>
+                                    <td>${ev.datas[key].end}</td>
+                                    <td class="actions" style="white-space: nowrap; width: 100px;">
+                                        <div class="action">
+                                            <a href="admin/deliveryorder/edit/${ev.datas[key].id}"><span
+                                                    class="icon pencil-lg-icon"></span></a>
+                                            <a href="admin/deliveryorder/view/${ev.datas[key].id}" target="_blank"><span
+                                                    class="icon eye-icon"></span></a>
+                                            <a href="javascript:void(0)" class="item-del" data-id="${ev.datas[key].id}"><span
+                                                    class="icon trash-icon"></span></a>
+                                        </div>
+                                    </td>
+                                </tr>`;
+                            }
 
-                $('#btn-filter-modal').html('Filter');
-                $('#deliveryFilterModal').modal('hide');
-                Toast.fire({
-                    icon: "success",
-                    title: "Load Success"
-                });
-            }).catch();
+                            $('#table-data-delivery-order').DataTable().destroy();
+                            $('#table-data-delivery-order tbody').html(tr);
+                            $('#table-data-delivery-order').DataTable({
+                                dom: 'Bfrtip',
+                                buttons: [
+                                    'print'
+                                ]
+                            });
+                            $('<button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107; margin-right: 20px;">Filter</button>').insertBefore('.buttons-print');
+                            $('<br><br>').insertAfter('.buttons-print');
+                            $('.buttons-print').addClass('btn btn-sm btn-primary');
+                            $('#btn-filter').click(function(){
+                                $('#deliveryFilterModal').modal('show');
+                            });
+
+                            $('#btn-filter-modal').html('Filter');
+                            $('#deliveryFilterModal').modal('hide');
+
+                            Toast.fire({
+                            icon: "success",
+                            title: "Load Success"
+                            });
+
+                        }else{
+
+                            // $('#table-data-delivery-order').DataTable().destroy();
+                            $('#table-data-delivery-order tbody').html(`<tr>
+                                <td colspan="8">${ev.datas}</td>
+
+                                </tr>`);
+                            // $('#table-data-delivery-order').DataTable();
+
+                            $('#btn-filter-modal').html('Filter');
+                            $('#deliveryFilterModal').modal('hide');
+
+                            Toast.fire({
+                            icon: "success",
+                            title: "Load Success"
+                            });
+
+                        }
+                    }
+            });
         });
 
-        // $('.tet').on('click', function(){
-        //     // table.page.len(-1).draw();
-        //     // window.open('', '_blank');
-        //     var openPrint = window.open('/admin/deliveryorder/cetak-do','_blank');
-        //     openPrint.onload = function() {
-        //         var doc = openPrint.document;
-        //         // let newDiv =  doc.document.createElement("div");
-        //         // newDiv.className = "card-body";
-        //         // doc.document.getElementsByClassName('contain').item(0).appendChild(newDiv);
-        //         var newDiv = $(``);
-
-        //         $(doc).find('body').append(newDiv);
-
-        //     };
-        // })
         $(document).on("click", ".item-del", function() {
 
             let ini = $(this);
