@@ -9,7 +9,7 @@ Route::group([
         'view' => 'deliveryorder::admin.index-custom',
     ])->name('admin.deliveryorder.index');
 
-    Route::get('/cetak-do', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@cetakDo')->defaults('_config', [
+    Route::post('/cetak-do', 'Webkul\DeliveryOrder\Http\Controllers\Admin\DeliveryOrderController@cetakDo')->defaults('_config', [
         'view' => 'deliveryorder::admin.cetak-do',
     ])->name('admin.deliveryorder.cetak-do');
 

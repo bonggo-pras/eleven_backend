@@ -17,8 +17,8 @@ use Webkul\Product\Models\Product;
 use Webkul\Core\Traits\PDFHandler;
 use Webkul\Product\Models\ProductInventory;
 use Webkul\Sales\Repositories\ShipmentItemRepository;
-// use DataTables;
 use Yajra\DataTables\Facades\DataTables;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DeliveryOrderController extends Controller
 {
@@ -228,14 +228,64 @@ class DeliveryOrderController extends Controller
      */
     public function cetakDo($id)
     {
-        // $deliveryOrder = DeliveryOrder::with(['items', 'items.productFlat'])->where('id', $id)->first();
 
-        // return $this->downloadPDF(
-        //     view($this->_config['view'], compact('deliveryOrder'))->render(),
-        //     'delivery-order-' . $deliveryOrder->created_at->format('d-m-Y')
-        // );
-        return view($this->_config['view']);
+        $datas = \DB::table('delivery_order_items as doi')
+            ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
+            ->join('product_categories as pc', 'pc.product_id', '=', 'doi.product_id')
+            ->join('category_translations as ct', 'ct.category_id', '=', 'pc.category_id')
+            ->join('products as p', 'p.id', '=', 'pc.product_id')
+            ->select(
+                'do.id',
+                'do.store_name',
+                'doi.id as delivery_order_items_id',
+                'p.sku as nama_product',
+                \DB::raw('SUM(doi.stock) as jumlah_stok'),
+                'ct.name as nama_kategori',
+                'do.name',
+                'do.end'
+            );
+
+        $print_name = $_POST['print_name'];
+        $print_name_do = $_POST['print_name_do'];
+        $print_store_name_barang = $_POST['print_store_name_barang'];
+        $print_kategori_barang = $_POST['print_kategori_barang'];
+        $print_tgl_awal = $_POST['print_tgl_awal'];
+        $print_tgl_akhir = $_POST['print_tgl_akhir'];
+
+        if ($print_name != '') {
+            $datas = $datas->where('p.sku', 'like', "%{$print_name}%");
+        }
+        if ($print_name_do != '') {
+            $datas = $datas->where('do.name', 'like', "%{$print_name_do}%");
+        }
+        if ($print_store_name_barang != '') {
+            $datas = $datas->where('do.store_name', 'like', "%{$print_store_name_barang}%");
+        }
+
+        if ($print_kategori_barang != '') {
+            $datas = $datas->where('ct.category_id', '=', "{$print_kategori_barang}");
+        }
+
+        if ($print_tgl_awal != '') {
+            $datas = $datas->whereDate('do.end', '>=', "{$print_tgl_awal}");
+        }
+
+        if ($print_tgl_awal != '') {
+            $datas = $datas->whereDate('do.end', '<=', "{$print_tgl_awal}");
+        }
+        $datas = $datas->groupBy(
+            'ct.category_id',
+            'do.id',
+            'p.id',
+            'do.name',
+            'do.end'
+            // )->limit(50)->get();
+        )->get();
+
+        $pdf = Pdf::loadView($this->_config['view'], ['datas' => $datas])->setPaper('a4', 'landscape');
+        return $pdf->stream();
     }
+
 
     /**
      * Show the form for editing the specified resource.

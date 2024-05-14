@@ -26,6 +26,20 @@ Delivery Orders
 
     <div class="page-content">
 
+        <form action="{{route('admin.deliveryorder.cetak-do')}}" method="post" target="_blank">
+            @csrf
+            <input type="hidden" id="print_name" name="print_name" value="">
+            <input type="hidden" id="print_name_do" name="print_name_do" value="">
+            <input type="hidden" id="print_store_name_barang" name="print_store_name_barang" value="">
+            <input type="hidden" id="print_kategori_barang" name="print_kategori_barang" value="">
+            <input type="hidden" id="print_tgl_awal" name="print_tgl_awal" value="">
+            <input type="hidden" id="print_tgl_akhir" name="print_tgl_akhir" value="">
+
+            <button id="btn-filter" class="btn btn-sm"
+                style="background-color:#ffc107; margin-right: 20px;">Filter</button> <button type="submit"
+                id="btn-print" class="btn btn-sm btn-primary" style=" margin-right: 20px;">Print</button>
+
+        </form>
         <table class="table-data-delivery-order" id="table-data-delivery-order">
             <thead>
                 <tr style=" height: 65px;">
@@ -184,18 +198,18 @@ Delivery Orders
                     {data: 'end', name: 'end'},
                     {data:'action',name:'action'}
                 ],
-            dom: 'Bfrtip',
-            buttons: [{
-                extend: 'print',
-                oSelectorOpts: {
-                    page: 'all'
-                },
-            }]
+            // dom: 'Bfrtip',
+            // buttons: [{
+            //     extend: 'print',
+            //     oSelectorOpts: {
+            //         page: 'all'
+            //     },
+            // }]
         });
 
-        $('<button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107; margin-right: 20px;">Filter</button>').insertBefore('.buttons-print');
-        $('<br><br>').insertAfter('.buttons-print');
-        $('.buttons-print').addClass('btn btn-sm btn-primary');
+        // $('<button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107; margin-right: 20px;">Filter</button>').insertBefore('.buttons-print');
+        // $('<br><br>').insertAfter('.buttons-print');
+        // $('.buttons-print').addClass('btn btn-sm btn-primary');
 
         $('#btn-filter').click(function(){
             $('#deliveryFilterModal').modal('show');
@@ -204,6 +218,12 @@ Delivery Orders
         $('#deliveryFilterForm').submit(function(e){
             e.preventDefault();
             let ini = $(this);
+            $('#print_name').val($('#name').val());
+            $('#print_name_do').val( $('#name_do').val())
+            $('#print_store_name_barang').val($('#store_name_barang').val())
+            $('#print_kategori_barang').val($('#kategori_barang').val())
+            $('#print_tgl_awal').val($('#tgl_awal').val())
+            $('#print_tgl_akhir').val($('#tgl_akhir').val())
 
             $('#table-data-delivery-order').DataTable().destroy();
 
@@ -233,22 +253,22 @@ Delivery Orders
                             {data: 'end', name: 'end'},
                             {data:'action',name:'action'}
                     ],
-                    dom: 'Bfrtip',
-                    buttons: [{
-                        extend: 'print',
-                        oSelectorOpts: {
-                            page: 'all'
-                        },
-                    }]
+                    // dom: 'Bfrtip',
+                    // buttons: [{
+                    //     extend: 'print',
+                    //     oSelectorOpts: {
+                    //         page: 'all'
+                    //     },
+                    // }]
                 });
             }
 
             $('#btn-filter-modal').html('load...');
 
             load().then(function(){
-                $('<button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107; margin-right: 20px;">Filter</button>').insertBefore('.buttons-print');
-                $('<br><br>').insertAfter('.buttons-print');
-                $('.buttons-print').addClass('btn btn-sm btn-primary');
+                // $('<button id="btn-filter" class="btn btn-sm" style="background-color:#ffc107; margin-right: 20px;">Filter</button>').insertBefore('.buttons-print');
+                // $('<br><br>').insertAfter('.buttons-print');
+                // $('.buttons-print').addClass('btn btn-sm btn-primary');
                 $('#btn-filter').click(function(){
                     $('#deliveryFilterModal').modal('show');
                 });
