@@ -75,52 +75,61 @@ class DeliveryOrderController extends Controller
                 'do.end'
             )
             ->groupBy('ct.category_id', 'do.id', 'p.id', 'do.name', 'do.end')
+            ->orderBy('do.created_at', 'desc')
             ->get();
 
         return view($this->_config['view'], ['datas' => $datas]);
     }
     public function indexJson(Request $request)
     {
-        $datas = DB::table('delivery_order_items as doi')
-            ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
-            ->join('product_categories as pc', 'pc.product_id', '=', 'doi.product_id')
-            ->join('category_translations as ct', 'ct.category_id', '=', 'pc.category_id')
-            ->join('products as p', 'p.id', '=', 'pc.product_id')
+        $subQuery = DB::table('delivery_order_items as doi')
             ->select(
                 'do.id',
                 'do.store_name',
                 'doi.id as delivery_order_items_id',
                 'p.sku as nama_product',
                 DB::raw('SUM(doi.stock) as jumlah_stok'),
-                'ct.name as nama_kategori',
                 'do.name',
-                'do.end'
-            );
+                'do.end',
+                'do.created_at',
+                DB::raw('(SELECT MAX(pc.category_id)
+            FROM product_categories pc
+            JOIN category_translations ct ON ct.category_id = pc.category_id
+            WHERE product_id = doi.product_id
+            ORDER BY pc.category_id DESC) as kategori_id')
+            )
+            ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
+            ->join('products as p', 'p.id', '=', 'doi.product_id')
+            ->groupBy('do.id', 'p.id', 'do.name', 'do.end');
 
+        $datas = DB::table(DB::raw("({$subQuery->toSql()}) as y"))
+            ->mergeBindings($subQuery)
+            ->join('category_translations as ct', 'ct.category_id', '=', 'y.kategori_id')
+            ->select('y.*', 'ct.name as nama_kategori');
 
         if ($request->name != '') {
-            $datas = $datas->where('p.sku', 'like', "%{$request->name}%");
+            $datas = $datas->where('y.sku', 'like', "%{$request->name}%");
         }
         if ($request->name_do != '') {
-            $datas = $datas->where('do.name', 'like', "%{$request->name_do}%");
+            $datas = $datas->where('y.name', 'like', "%{$request->name_do}%");
         }
         if ($request->store_name_barang != '') {
-            $datas = $datas->where('do.store_name', 'like', "%{$request->store_name_barang}%");
+            $datas = $datas->where('y.store_name', 'like', "%{$request->store_name_barang}%");
         }
 
         if ($request->kategori_barang != '') {
-            $datas = $datas->where('ct.category_id', '=', "{$request->kategori_barang}");
+            $datas = $datas->where('y.kategori_id', '=', "{$request->kategori_barang}");
         }
 
         if ($request->tgl_awal != '') {
-            $datas = $datas->whereDate('do.end', '>=', "{$request->tgl_awal}");
+            $datas = $datas->whereDate('y.end', '>=', "{$request->tgl_awal}");
         }
 
         if ($request->tgl_akhir != '') {
-            $datas = $datas->whereDate('do.end', '<=', "{$request->tgl_akhir}");
+            $datas = $datas->whereDate('y.end', '<=', "{$request->tgl_akhir}");
         }
-        $datas = $datas->groupBy('ct.category_id', 'do.id', 'p.id', 'do.name', 'do.end')->get();
 
+        $datas = $datas->get();
         return DataTables::of($datas)->addIndexColumn()->addColumn('action', function ($row) {
             $button =  '<div class="action">';
             $button .= "<a href='/admin/deliveryorder/edit/$row->id'><span

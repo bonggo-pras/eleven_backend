@@ -35,7 +35,7 @@ Delivery Orders
             <input type="hidden" id="print_tgl_awal" name="print_tgl_awal" value="">
             <input type="hidden" id="print_tgl_akhir" name="print_tgl_akhir" value="">
 
-            <button id="btn-filter" class="btn btn-sm"
+            <button id="btn-filter" type="button" class="btn btn-sm"
                 style="background-color:#ffc107; margin-right: 20px;">Filter</button> <button type="submit"
                 id="btn-print" class="btn btn-sm btn-primary" style=" margin-right: 20px;">Print</button>
 
@@ -44,7 +44,8 @@ Delivery Orders
             <thead>
                 <tr style=" height: 65px;">
                     <!---->
-                    <th>ID</th>
+                    <th>No</th>
+                    <th>Id DO</th>
                     <th>Kategori Barang</th>
                     <th>Barang</th>
                     <th>Stok</th>
@@ -190,6 +191,7 @@ Delivery Orders
             },
             columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
+                    {data:'id', name: 'id'},
                     {data: 'nama_kategori', name: 'nama_kategori'},
                     {data: 'nama_product', name: 'nama_product'},
                     {data: 'jumlah_stok', name: 'jumlah_stok'},
@@ -241,10 +243,12 @@ Delivery Orders
                             'store_name_barang': $('#store_name_barang').val(),
                             'tgl_awal': $('#tgl_awal').val(),
                             'tgl_akhir': $('#tgl_akhir').val(),
+                            'kategori_barang': $('#kategori_barang').val()
                         }
                     },
                     columns: [
                             {data: 'DT_RowIndex', name: 'DT_RowIndex'},
+                            {data:'id', name: 'id'},
                             {data: 'nama_kategori', name: 'nama_kategori'},
                             {data: 'nama_product', name: 'nama_product'},
                             {data: 'jumlah_stok', name: 'jumlah_stok'},
