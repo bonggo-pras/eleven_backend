@@ -235,24 +235,32 @@ class DeliveryOrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\View\View
      */
-    public function cetakDo($id)
+    public function cetakDo()
     {
-
-        $datas = \DB::table('delivery_order_items as doi')
-            ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
-            ->join('product_categories as pc', 'pc.product_id', '=', 'doi.product_id')
-            ->join('category_translations as ct', 'ct.category_id', '=', 'pc.category_id')
-            ->join('products as p', 'p.id', '=', 'pc.product_id')
+        $subQuery = DB::table('delivery_order_items as doi')
             ->select(
                 'do.id',
                 'do.store_name',
                 'doi.id as delivery_order_items_id',
                 'p.sku as nama_product',
-                \DB::raw('SUM(doi.stock) as jumlah_stok'),
-                'ct.name as nama_kategori',
+                DB::raw('SUM(doi.stock) as jumlah_stok'),
                 'do.name',
-                'do.end'
-            );
+                'do.end',
+                'do.created_at',
+                DB::raw('(SELECT MAX(pc.category_id)
+        FROM product_categories pc
+        JOIN category_translations ct ON ct.category_id = pc.category_id
+        WHERE product_id = doi.product_id
+        ORDER BY pc.category_id DESC) as kategori_id')
+            )
+            ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
+            ->join('products as p', 'p.id', '=', 'doi.product_id')
+            ->groupBy('do.id', 'p.id', 'do.name', 'do.end');
+
+        $datas = DB::table(DB::raw("({$subQuery->toSql()}) as y"))
+            ->mergeBindings($subQuery)
+            ->join('category_translations as ct', 'ct.category_id', '=', 'y.kategori_id')
+            ->select('y.*', 'ct.name as nama_kategori');
 
         $print_name = $_POST['print_name'];
         $print_name_do = $_POST['print_name_do'];
@@ -262,34 +270,27 @@ class DeliveryOrderController extends Controller
         $print_tgl_akhir = $_POST['print_tgl_akhir'];
 
         if ($print_name != '') {
-            $datas = $datas->where('p.sku', 'like', "%{$print_name}%");
+            $datas = $datas->where('y.sku', 'like', "%{$print_name}%");
         }
         if ($print_name_do != '') {
-            $datas = $datas->where('do.name', 'like', "%{$print_name_do}%");
+            $datas = $datas->where('y.name', 'like', "%{$print_name_do}%");
         }
         if ($print_store_name_barang != '') {
-            $datas = $datas->where('do.store_name', 'like', "%{$print_store_name_barang}%");
+            $datas = $datas->where('y.store_name', 'like', "%{$print_store_name_barang}%");
         }
 
         if ($print_kategori_barang != '') {
-            $datas = $datas->where('ct.category_id', '=', "{$print_kategori_barang}");
+            $datas = $datas->where('y.kategori_id', '=', "{$print_kategori_barang}");
         }
 
         if ($print_tgl_awal != '') {
-            $datas = $datas->whereDate('do.end', '>=', "{$print_tgl_awal}");
+            $datas = $datas->whereDate('y.end', '>=', "{$print_tgl_awal}");
         }
 
-        if ($print_tgl_awal != '') {
-            $datas = $datas->whereDate('do.end', '<=', "{$print_tgl_awal}");
+        if ($print_tgl_akhir != '') {
+            $datas = $datas->whereDate('y.end', '<=', "{$print_tgl_akhir}");
         }
-        $datas = $datas->groupBy(
-            'ct.category_id',
-            'do.id',
-            'p.id',
-            'do.name',
-            'do.end'
-            // )->limit(50)->get();
-        )->get();
+        $datas = $datas->get();
 
         $pdf = Pdf::loadView($this->_config['view'], ['datas' => $datas])->setPaper('a4', 'landscape');
         return $pdf->stream();
