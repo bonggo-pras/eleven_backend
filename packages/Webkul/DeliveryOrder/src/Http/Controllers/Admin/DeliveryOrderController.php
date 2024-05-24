@@ -100,7 +100,8 @@ class DeliveryOrderController extends Controller
             )
             ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
             ->join('products as p', 'p.id', '=', 'doi.product_id')
-            ->groupBy('do.id', 'p.id', 'do.name', 'do.end');
+            ->groupBy('do.id', 'p.id', 'do.name', 'do.end')->orderBy('created_at', 'desc');
+
 
         $datas = DB::table(DB::raw("({$subQuery->toSql()}) as y"))
             ->mergeBindings($subQuery)
@@ -255,7 +256,7 @@ class DeliveryOrderController extends Controller
             )
             ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
             ->join('products as p', 'p.id', '=', 'doi.product_id')
-            ->groupBy('do.id', 'p.id', 'do.name', 'do.end');
+            ->groupBy('do.id', 'p.id', 'do.name', 'do.end')->orderBy('created_at', 'desc');
 
         $datas = DB::table(DB::raw("({$subQuery->toSql()}) as y"))
             ->mergeBindings($subQuery)
