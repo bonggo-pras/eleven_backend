@@ -109,7 +109,7 @@ class DeliveryOrderController extends Controller
             ->select('y.*', 'ct.name as nama_kategori');
 
         if ($request->name != '') {
-            $datas = $datas->where('y.sku', 'like', "%{$request->name}%");
+            $datas = $datas->where('y.nama_product', 'like', "%{$request->name}%");
         }
         if ($request->name_do != '') {
             $datas = $datas->where('y.name', 'like', "%{$request->name_do}%");
@@ -271,7 +271,7 @@ class DeliveryOrderController extends Controller
         $print_tgl_akhir = $_POST['print_tgl_akhir'];
 
         if ($print_name != '') {
-            $datas = $datas->where('y.sku', 'like', "%{$print_name}%");
+            $datas = $datas->where('y.nama_product', 'like', "%{$print_name}%");
         }
         if ($print_name_do != '') {
             $datas = $datas->where('y.name', 'like', "%{$print_name_do}%");
