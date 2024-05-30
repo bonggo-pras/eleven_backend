@@ -10,7 +10,10 @@ Delivery Orders
 {{--
 <link href="//cdn.datatables.net/2.0.5/css/dataTables.dataTables.min.css" rel="stylesheet" type="text/css"> --}}
 <link href="https://cdn.datatables.net/2.0.7/css/dataTables.dataTables.min.css" rel="stylesheet" type="text/css">
-
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css"
+    integrity="sha512-34s5cpvaNG3BknEWSuOncX28vz97bRI59UnVtEEpFX536A7BtZSJHsDyFoCl8S7Dt2TPzcrCEoHBGeM4SUBDBw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <div class="content">
     <div class="page-header">
@@ -114,13 +117,15 @@ Delivery Orders
                         <tr>
                             <td> <label for="tgl_awal" style="font-weight: bold;">Tanggal Awal</label></td>
                             <td>:</td>
-                            <td> <input class="control" name="tgl_awal" id="tgl_awal" type="date" style="width:100%;">
+                            <td> <input class="control tgl_awal" name="tgl_awal" id="tgl_awal" type="text"
+                                    style="width:100%;">
                             </td>
                         </tr>
                         <tr>
                             <td> <label for="tgl_akhir" style="font-weight: bold;">Tanggal Akhir</label></td>
                             <td>:</td>
-                            <td> <input class="control" name="tgl_akhir" id="tgl_akhir" type="date" style="width:100%;">
+                            <td> <input class="control tgl_akhir" name="tgl_akhir" id="tgl_akhir" type="text"
+                                    style="width:100%;">
                             </td>
                         </tr>
                     </table>
@@ -143,12 +148,14 @@ Delivery Orders
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
 </script>
-{{-- <script src="https://cdn.datatables.net/2.0.5/js/dataTables.js"></script> --}}
 <script src="https://cdn.datatables.net/2.0.7/js/dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"
+    integrity="sha512-LsnSViqQyaXpD4mBBdRYeP6sRwJiJveh2ZIbW41EBrNmKxgr/LFZIiWT6yr+nycvhvauz8c2nYMhrP80YhG7Cw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
 <script>
     $(document).ready(function() {
         const Toast = Swal.mixin({
@@ -168,19 +175,22 @@ Delivery Orders
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
          });
-        //  $.ajax({
-        //     url: "{{route('admin.deliveryorder.indexJson')}}",
-        //     method: "POST",
-        //     success: function(ev) {
-        //          console.log(ev)
-        //     }
-        // });
-        // $('#table-data-delivery-order').DataTable({
-        //     "ajax": {
-        //         "url": "{{route('admin.deliveryorder.indexJson')}}",
-        //         "type": "GET"
-        //     }
-        // });
+
+        $('.tgl_awal').datepicker({format:'dd/mm/yyyy'});
+        $('.tgl_awal').datepicker('setDate',moment().subtract(1, 'months').format('DD/MM/YYYY'));
+
+
+        $('.tgl_akhir').datepicker({format:'dd/mm/yyyy'});
+        $('.tgl_akhir').datepicker('setDate',moment().format('DD/MM/YYYY'));
+
+        let tgl_awal = $('#tgl_awal').val();
+        tgl_awal = tgl_awal.split('/');
+        tgl_awal = tgl_awal[2]+'-'+tgl_awal[1]+'-'+tgl_awal[0];
+        let tgl_akhir = $('#tgl_akhir').val();
+        tgl_akhir = tgl_akhir.split('/');
+        tgl_akhir = tgl_akhir[2]+'-'+tgl_akhir[1]+'-'+tgl_akhir[0];
+        $('#print_tgl_awal').val(tgl_awal)
+        $('#print_tgl_akhir').val(tgl_akhir)
 
         var table = $('#table-data-delivery-order').DataTable({
             processing: true,
@@ -188,6 +198,10 @@ Delivery Orders
             ajax: {
                 url: "{{route('admin.deliveryorder.indexJson')}}",
                 type: "POST",
+                data: {
+                    'tgl_awal': tgl_awal,
+                    'tgl_akhir': tgl_akhir,
+                }
             },
             columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
@@ -220,13 +234,22 @@ Delivery Orders
         $('#deliveryFilterForm').submit(function(e){
             e.preventDefault();
             let ini = $(this);
+            let tgl_awal = $('#tgl_awal').val();
+            tgl_awal = tgl_awal.split('/');
+            tgl_awal = tgl_awal[2]+'-'+tgl_awal[1]+'-'+tgl_awal[0];
+            let tgl_akhir = $('#tgl_akhir').val();
+            tgl_akhir = tgl_akhir.split('/');
+            tgl_akhir = tgl_akhir[2]+'-'+tgl_akhir[1]+'-'+tgl_akhir[0];
+
             $('#print_name').val($('#name').val());
             $('#print_name_do').val( $('#name_do').val())
             $('#print_store_name_barang').val($('#store_name_barang').val())
             $('#print_kategori_barang').val($('#kategori_barang').val())
-            $('#print_tgl_awal').val($('#tgl_awal').val())
-            $('#print_tgl_akhir').val($('#tgl_akhir').val())
-
+            $('#print_tgl_awal').val(tgl_awal)
+            $('#print_tgl_akhir').val(tgl_akhir)
+            // console.log(tgl_awal, tgl_akhir)
+            // console.log(tgl_awal, $('#tgl_awal').val());
+            // console.log(tgl_awal,$('.tgl_akhir').val());
             $('#table-data-delivery-order').DataTable().destroy();
 
             async function load(){
@@ -241,8 +264,8 @@ Delivery Orders
                             'name': $('#name').val(),
                             'name_do': $('#name_do').val(),
                             'store_name_barang': $('#store_name_barang').val(),
-                            'tgl_awal': $('#tgl_awal').val(),
-                            'tgl_akhir': $('#tgl_akhir').val(),
+                            'tgl_awal': tgl_awal,
+                            'tgl_akhir': tgl_akhir,
                             'kategori_barang': $('#kategori_barang').val()
                         }
                     },
@@ -286,21 +309,7 @@ Delivery Orders
             }).catch();
         });
 
-        // $('.tet').on('click', function(){
-        //     // table.page.len(-1).draw();
-        //     // window.open('', '_blank');
-        //     var openPrint = window.open('/admin/deliveryorder/cetak-do','_blank');
-        //     openPrint.onload = function() {
-        //         var doc = openPrint.document;
-        //         // let newDiv =  doc.document.createElement("div");
-        //         // newDiv.className = "card-body";
-        //         // doc.document.getElementsByClassName('contain').item(0).appendChild(newDiv);
-        //         var newDiv = $(``);
 
-        //         $(doc).find('body').append(newDiv);
-
-        //     };
-        // })
         $(document).on("click", ".item-del", function() {
 
             let ini = $(this);
