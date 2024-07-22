@@ -4,9 +4,19 @@ Route::group([
     'prefix'        => 'admin/inventorymanagement',
     'middleware'    => ['web', 'admin']
 ], function () {
-    Route::get('', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@index')->defaults('_config', [
-        'view' => 'inventorymanagement::admin.index',
+    // Route::get('', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@index')->defaults('_config', [
+    //     'view' => 'inventorymanagement::admin.index',
+    // ])->name('admin.inventorymanagement.index');
+
+    Route::get('', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@indexCustom')->defaults('_config', [
+        'view' => 'inventorymanagement::admin.index-custom',
     ])->name('admin.inventorymanagement.index');
+
+    Route::post('/cetak-inventory-management', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@cetakDo')->defaults('_config', [
+        'view' => 'inventorymanagement::admin.cetak-barangmasuk',
+    ])->name('admin.inventorymanagement.cetak-inventory-management');
+
+    Route::post('/index-json', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@indexJson')->name('admin.inventorymanagement.indexJson');
 
     Route::get('/create', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@create')->defaults('_config', [
         'view' => 'inventorymanagement::admin.create',
@@ -33,4 +43,6 @@ Route::group([
     Route::post('/print/delete/{id}', 'Webkul\InventoryManagement\Http\Controllers\Admin\InventoryManagementController@destroy')->defaults('_config', [
         'redirect' => 'admin.inventorymanagement.index',
     ])->name('admin.inventorymanagement.delete');
+
+    
 });

@@ -9,12 +9,15 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Webkul\Admin\DataGrids\InventoryManagementDataGrid;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Webkul\InventoryManagement\Models\InventoryManagement;
 use Webkul\InventoryManagement\Models\InventoryManagementItem;
 use Webkul\Product\Models\Product;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Webkul\Core\Traits\PDFHandler;
 use Webkul\Product\Models\ProductInventory;
+use Yajra\DataTables\Facades\DataTables;
 
 class InventoryManagementController extends Controller
 {
@@ -51,6 +54,165 @@ class InventoryManagementController extends Controller
         }
 
         return view($this->_config['view']);
+    }
+
+    public function indexCustom()
+    {
+        $datas = DB::table('inventory_management_items as imi')
+            ->join('inventory_management as im', 'im.id', '=', 'imi.inventory_management_id')
+            ->join('product_categories as pc', 'pc.product_id', '=', 'imi.product_id')
+            ->join('category_translations as ct', 'ct.category_id', '=', 'pc.category_id')
+            ->join('products as p', 'p.id', '=', 'pc.product_id')
+            ->select(
+                'im.id',
+                'imi.id as inventory_management_items_id',
+                'p.sku as nama_product',
+                DB::raw('SUM(imi.stock) as jumlah_stok'),
+                'ct.name as nama_kategori',
+                'im.name',
+                'im.end'
+            )
+            ->groupBy('ct.category_id', 'im.id', 'p.id', 'im.name', 'im.end')
+            ->orderBy('im.created_at', 'desc')
+            ->get();
+
+        return view($this->_config['view'], ['datas' => $datas]);
+    }
+
+    public function indexJson(Request $request)
+    {
+        $datas = InventoryManagementItem::select([
+            'inv_management.id',
+            'inv_management.name',
+            'inv_management.end',
+            'inventory_management_items.stock as jumlah_stok',
+            'products.id as product_id',
+            'product_flat.name as nama_product',
+            'category_translations.name as nama_kategori',
+            DB::raw('CASE WHEN product_flat.name IS NULL THEN "Produk ini sudah dihapus" ELSE product_flat.name END as nama_product'),
+            DB::raw('CASE WHEN product_flat.name IS NULL THEN "Produk ini sudah dihapus" ELSE category_translations.name END as nama_kategori'),
+            'latest_product_category.category_id'
+        ])
+        ->join('inventory_management as inv_management', 'inv_management.id', '=', 'inventory_management_items.inventory_management_id')
+        ->join('products', 'products.id', '=', 'inventory_management_items.product_id')
+        ->join('product_flat', 'product_flat.product_id', '=', 'products.id')
+        ->leftJoin(DB::raw('(
+            SELECT 
+                pc1.product_id, 
+                COALESCE(products.parent_id, pc1.category_id) AS category_id
+            FROM product_categories pc1
+            JOIN products ON products.id = pc1.product_id
+            WHERE pc1.id = (
+                SELECT pc2.id
+                FROM product_categories pc2
+                WHERE pc2.product_id = pc1.product_id
+                ORDER BY pc2.id DESC
+                LIMIT 1
+            )
+        ) as latest_product_category'), function($join) {
+            $join->on('products.id', '=', 'latest_product_category.product_id')
+                 ->orOn('products.parent_id', '=', 'latest_product_category.product_id');
+        })
+        ->leftJoin('category_translations', 'category_translations.category_id', '=', 'latest_product_category.category_id')
+        ->orderBy('inv_management.created_at', 'desc');
+
+        if ($request->name != '' || $request->name != null) {
+            $datas = $datas->where('product_flat.name', 'like', "%{$request->name}%");
+        }
+
+        if ($request->name_inventory_management != '' || $request->name_inventory_management != null) {
+            $datas = $datas->where('inv_management.name', 'like', "%{$request->name_inventory_management}%");
+        }
+
+        if ($request->kategori_barang != '' || $request->kategori_barang != null) {
+            $datas = $datas->where('latest_product_category.category_id', '=', "{$request->kategori_barang}");
+        }
+
+        if ($request->tgl_awal != '' || $request->tgl_awal != null) {
+            $datas = $datas->whereDate('inv_management.end', '>=', "{$request->tgl_awal}");
+        }
+
+        if ($request->tgl_akhir != '' || $request->tgl_akhir != null) {
+            $datas = $datas->whereDate('inv_management.end', '<=', "{$request->tgl_akhir}");
+        }
+
+        $datas = $datas->get();
+
+        return DataTables::of($datas)->addIndexColumn()->addColumn('action', function ($row) {
+            $button =  '<div class="action">';
+            $button .= "<a href='/admin/inventorymanagement/edit/$row->id'><span
+                 class='icon pencil-lg-icon'></span></a>
+                 <a href='/admin/inventorymanagement/view/$row->id) }}'><span
+                 class='icon eye-icon'></span></a>
+                 <a href='javascript::void(0)' class='item-del' data-id='$row->id'><span
+                 class='icon trash-icon'></span></a>
+                ";
+            $button .= '</div>';
+            return $button;
+        })->make();
+    }
+
+    public function cetakDo(Request $request)
+    {
+        $datas = InventoryManagementItem::select([
+            'inv_management.id',
+            'inv_management.name',
+            'inv_management.end',
+            'inventory_management_items.stock as jumlah_stok',
+            'products.id as product_id',
+            'product_flat.name as nama_product',
+            'category_translations.name as nama_kategori',
+            DB::raw('CASE WHEN product_flat.name IS NULL THEN "produk ini telah dihapus" ELSE product_flat.name END as nama_product'),
+            DB::raw('CASE WHEN product_flat.name IS NULL THEN "Produk ini sudah dihapus" ELSE category_translations.name END as nama_kategori'),
+            'latest_product_category.category_id'
+        ])
+        ->join('inventory_management as inv_management', 'inv_management.id', '=', 'inventory_management_items.inventory_management_id')
+        ->join('products', 'products.id', '=', 'inventory_management_items.product_id')
+        ->join('product_flat', 'product_flat.product_id', '=', 'products.id')
+        ->leftJoin(DB::raw('(
+            SELECT 
+                pc1.product_id, 
+                COALESCE(products.parent_id, pc1.category_id) AS category_id
+            FROM product_categories pc1
+            JOIN products ON products.id = pc1.product_id
+            WHERE pc1.id = (
+                SELECT pc2.id
+                FROM product_categories pc2
+                WHERE pc2.product_id = pc1.product_id
+                ORDER BY pc2.id DESC
+                LIMIT 1
+            )
+        ) as latest_product_category'), function($join) {
+            $join->on('products.id', '=', 'latest_product_category.product_id')
+                 ->orOn('products.parent_id', '=', 'latest_product_category.product_id');
+        })
+        ->leftJoin('category_translations', 'category_translations.category_id', '=', 'latest_product_category.category_id')
+        ->orderBy('inv_management.created_at', 'desc');
+
+        if ($request->print_name != '' || $request->print_name != null) {
+            $datas = $datas->where('product_flat.name', 'like', "%{$request->print_name}%");
+        }
+
+        if ($request->print_name_inventory_management != '' || $request->print_name_inventory_management != null) {
+            $datas = $datas->where('inv_management.name', 'like', "%{$request->print_name_inventory_management}%");
+        }
+
+        if ($request->print_kategori_barang != '' || $request->print_kategori_barang != null) {
+            $datas = $datas->where('latest_product_category.category_id', '=', "{$request->print_kategori_barang}");
+        }
+
+        if ($request->print_tgl_awal != '' || $request->print_tgl_awal != null) {
+            $datas = $datas->whereDate('inv_management.end', '>=', "{$request->print_tgl_awal}");
+        }
+
+        if ($request->print_tgl_akhir != '' || $request->print_tgl_akhir != null) {
+            $datas = $datas->whereDate('inv_management.end', '<=', "{$request->print_tgl_akhir}");
+        }
+
+        $datas = $datas->get();
+
+        $pdf = Pdf::loadView($this->_config['view'], ['datas' => $datas])->setPaper('a4', 'landscape');
+        return $pdf->stream();
     }
 
     /**

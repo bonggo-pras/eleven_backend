@@ -80,54 +80,63 @@ class DeliveryOrderController extends Controller
 
         return view($this->_config['view'], ['datas' => $datas]);
     }
+    
     public function indexJson(Request $request)
     {
-        $subQuery = DB::table('delivery_order_items as doi')
-            ->select(
-                'do.id',
-                'do.store_name',
-                'doi.id as delivery_order_items_id',
-                'p.sku as nama_product',
-                DB::raw('SUM(doi.stock) as jumlah_stok'),
-                'do.name',
-                'do.end',
-                'do.created_at',
-                DB::raw('(SELECT MAX(pc.category_id)
-            FROM product_categories pc
-            JOIN category_translations ct ON ct.category_id = pc.category_id
-            WHERE product_id = doi.product_id
-            ORDER BY pc.category_id DESC) as kategori_id')
+        $datas = DeliveryOrderItem::select([
+            'delivery_orders.id',
+            'delivery_orders.name',
+            'delivery_orders.end',
+            'delivery_orders.store_name',
+            'delivery_order_items.stock as jumlah_stok',
+            'products.id as product_id',
+            'product_flat.name as nama_product',
+            'category_translations.name as nama_kategori',
+            DB::raw('CASE WHEN product_flat.name IS NULL THEN "Produk ini sudah dihapus" ELSE product_flat.name END as nama_product'),
+            DB::raw('CASE WHEN product_flat.name IS NULL THEN "Produk ini sudah dihapus" ELSE category_translations.name END as nama_kategori'),
+            'latest_product_category.category_id'
+        ])
+        ->join('delivery_orders', 'delivery_orders.id', '=', 'delivery_order_items.delivery_order_id')
+        ->join('products', 'products.id', '=', 'delivery_order_items.product_id')
+        ->join('product_flat', 'product_flat.product_id', '=', 'products.id')
+        ->leftJoin(DB::raw('(
+            SELECT 
+                pc1.product_id, 
+                COALESCE(products.parent_id, pc1.category_id) AS category_id
+            FROM product_categories pc1
+            JOIN products ON products.id = pc1.product_id
+            WHERE pc1.id = (
+                SELECT pc2.id
+                FROM product_categories pc2
+                WHERE pc2.product_id = pc1.product_id
+                ORDER BY pc2.id DESC
+                LIMIT 1 
             )
-            ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
-            ->join('products as p', 'p.id', '=', 'doi.product_id')
-            ->groupBy('do.id', 'p.id', 'do.name', 'do.end')->orderBy('created_at', 'desc');
+        ) as latest_product_category'), function($join) {
+            $join->on('products.id', '=', 'latest_product_category.product_id')
+                 ->orOn('products.parent_id', '=', 'latest_product_category.product_id');
+        })
+        ->leftJoin('category_translations', 'category_translations.category_id', '=', 'latest_product_category.category_id')
+        ->orderBy('delivery_orders.created_at', 'desc');
 
-
-        $datas = DB::table(DB::raw("({$subQuery->toSql()}) as y"))
-            ->mergeBindings($subQuery)
-            ->join('category_translations as ct', 'ct.category_id', '=', 'y.kategori_id')
-            ->select('y.*', 'ct.name as nama_kategori');
-
-        if ($request->name != '') {
-            $datas = $datas->where('y.nama_product', 'like', "%{$request->name}%");
-        }
-        if ($request->name_do != '') {
-            $datas = $datas->where('y.name', 'like', "%{$request->name_do}%");
-        }
-        if ($request->store_name_barang != '') {
-            $datas = $datas->where('y.store_name', 'like', "%{$request->store_name_barang}%");
+        if ($request->name != '' || $request->name != null) {
+            $datas = $datas->where('product_flat.name', 'like', "%{$request->name}%");
         }
 
-        if ($request->kategori_barang != '') {
-            $datas = $datas->where('y.kategori_id', '=', "{$request->kategori_barang}");
+        if ($request->name_inventory_management != '' || $request->name_inventory_management != null) {
+            $datas = $datas->where('delivery_orders.name', 'like', "%{$request->name_inventory_management}%");
         }
 
-        if ($request->tgl_awal != '') {
-            $datas = $datas->whereDate('y.end', '>=', "{$request->tgl_awal}");
+        if ($request->kategori_barang != '' || $request->kategori_barang != null) {
+            $datas = $datas->where('latest_product_category.category_id', '=', "{$request->kategori_barang}");
         }
 
-        if ($request->tgl_akhir != '') {
-            $datas = $datas->whereDate('y.end', '<=', "{$request->tgl_akhir}");
+        if ($request->tgl_awal != '' || $request->tgl_awal != null) {
+            $datas = $datas->whereDate('delivery_orders.end', '>=', "{$request->tgl_awal}");
+        }
+
+        if ($request->tgl_akhir != '' || $request->tgl_akhir != null) {
+            $datas = $datas->whereDate('delivery_orders.end', '<=', "{$request->tgl_akhir}");
         }
 
         $datas = $datas->get();
@@ -236,60 +245,62 @@ class DeliveryOrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\View\View
      */
-    public function cetakDo()
+    public function cetakDo(Request $request)
     {
-        $subQuery = DB::table('delivery_order_items as doi')
-            ->select(
-                'do.id',
-                'do.store_name',
-                'doi.id as delivery_order_items_id',
-                'p.sku as nama_product',
-                DB::raw('SUM(doi.stock) as jumlah_stok'),
-                'do.name',
-                'do.end',
-                'do.created_at',
-                DB::raw('(SELECT MAX(pc.category_id)
-        FROM product_categories pc
-        JOIN category_translations ct ON ct.category_id = pc.category_id
-        WHERE product_id = doi.product_id
-        ORDER BY pc.category_id DESC) as kategori_id')
+        $datas = DeliveryOrderItem::select([
+            'delivery_orders.id',
+            'delivery_orders.name',
+            'delivery_orders.end',
+            'delivery_orders.store_name',
+            'delivery_order_items.stock as jumlah_stok',
+            'products.id as product_id',
+            'product_flat.name as nama_product',
+            'category_translations.name as nama_kategori',
+            DB::raw('CASE WHEN product_flat.name IS NULL THEN "Produk ini sudah dihapus" ELSE product_flat.name END as nama_product'),
+            DB::raw('CASE WHEN product_flat.name IS NULL THEN "Produk ini sudah dihapus" ELSE category_translations.name END as nama_kategori'),
+            'latest_product_category.category_id'
+        ])
+        ->join('delivery_orders', 'delivery_orders.id', '=', 'delivery_order_items.delivery_order_id')
+        ->join('products', 'products.id', '=', 'delivery_order_items.product_id')
+        ->join('product_flat', 'product_flat.product_id', '=', 'products.id')
+        ->leftJoin(DB::raw('(
+            SELECT 
+                pc1.product_id, 
+                COALESCE(products.parent_id, pc1.category_id) AS category_id
+            FROM product_categories pc1
+            JOIN products ON products.id = pc1.product_id
+            WHERE pc1.id = (
+                SELECT pc2.id
+                FROM product_categories pc2
+                WHERE pc2.product_id = pc1.product_id
+                ORDER BY pc2.id DESC
+                LIMIT 1 
             )
-            ->join('delivery_orders as do', 'do.id', '=', 'doi.delivery_order_id')
-            ->join('products as p', 'p.id', '=', 'doi.product_id')
-            ->groupBy('do.id', 'p.id', 'do.name', 'do.end')->orderBy('created_at', 'desc');
+        ) as latest_product_category'), function($join) {
+            $join->on('products.id', '=', 'latest_product_category.product_id')
+                 ->orOn('products.parent_id', '=', 'latest_product_category.product_id');
+        })
+        ->leftJoin('category_translations', 'category_translations.category_id', '=', 'latest_product_category.category_id')
+        ->orderBy('delivery_orders.created_at', 'desc');
 
-        $datas = DB::table(DB::raw("({$subQuery->toSql()}) as y"))
-            ->mergeBindings($subQuery)
-            ->join('category_translations as ct', 'ct.category_id', '=', 'y.kategori_id')
-            ->select('y.*', 'ct.name as nama_kategori');
-
-        $print_name = $_POST['print_name'];
-        $print_name_do = $_POST['print_name_do'];
-        $print_store_name_barang = $_POST['print_store_name_barang'];
-        $print_kategori_barang = $_POST['print_kategori_barang'];
-        $print_tgl_awal = $_POST['print_tgl_awal'];
-        $print_tgl_akhir = $_POST['print_tgl_akhir'];
-
-        if ($print_name != '') {
-            $datas = $datas->where('y.nama_product', 'like', "%{$print_name}%");
-        }
-        if ($print_name_do != '') {
-            $datas = $datas->where('y.name', 'like', "%{$print_name_do}%");
-        }
-        if ($print_store_name_barang != '') {
-            $datas = $datas->where('y.store_name', 'like', "%{$print_store_name_barang}%");
+        if ($request->print_name != '' || $request->print_name != null) {
+            $datas = $datas->where('product_flat.name', 'like', "%{$request->print_name}%");
         }
 
-        if ($print_kategori_barang != '') {
-            $datas = $datas->where('y.kategori_id', '=', "{$print_kategori_barang}");
+        if ($request->print_name_inventory_management != '' || $request->print_name_inventory_management != null) {
+            $datas = $datas->where('delivery_orders.name', 'like', "%{$request->print_name_inventory_management}%");
         }
 
-        if ($print_tgl_awal != '') {
-            $datas = $datas->whereDate('y.end', '>=', "{$print_tgl_awal}");
+        if ($request->print_kategori_barang != '' || $request->print_kategori_barang != null) {
+            $datas = $datas->where('latest_product_category.category_id', '=', "{$request->print_kategori_barang}");
         }
 
-        if ($print_tgl_akhir != '') {
-            $datas = $datas->whereDate('y.end', '<=', "{$print_tgl_akhir}");
+        if ($request->print_tgl_awal != '' || $request->print_tgl_awal != null) {
+            $datas = $datas->whereDate('delivery_orders.end', '>=', "{$request->print_tgl_awal}");
+        }
+
+        if ($request->print_tgl_akhir != '' || $request->print_tgl_akhir != null) {
+            $datas = $datas->whereDate('delivery_orders.end', '<=', "{$request->print_tgl_akhir}");
         }
         $datas = $datas->get();
 
